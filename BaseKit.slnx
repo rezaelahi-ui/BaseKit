@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/BaseKit/BaseKit.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/BaseKit.Tests/BaseKit.Tests.csproj" />
+  </Folder>
+</Solution>

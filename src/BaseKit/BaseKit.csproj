@@ -1,0 +1,41 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- شروع با netstandard2.0: پوشش .NET Framework 4.6.1+ تا .NET 8/9/10 -->
+    <!-- بعداً اگر لازم شد net461 یا net8.0/net10.0 جداگانه اضافه می‌کنیم -->
+    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <RootNamespace>BaseKit</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- پلی‌فیل اتریبیوت‌های Nullable (مثل NotNullWhen) برای فریم‌ورک‌هایی که BCL آن‌ها را ندارند (netstandard2.0 / net461).
+         فقط زمان کامپایل استفاده می‌شود، هیچ وابستگی به خروجی/runtime اضافه نمی‌کند. -->
+    <PackageReference Include="PolySharp" Version="1.14.1">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <!-- برای Clone<T> (سریالایز/دیسریالایز JSON) -->
+    <PackageReference Include="System.Text.Json" Version="8.0.5" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <!-- NuGet metadata -->
+    <PackageId>BaseKit</PackageId>
+    <Version>0.2.0</Version>
+    <Authors>Reza Elahi</Authors>
+    <Description>Common extension methods (string/object/...) shared across projects.</Description>
+    <PackageTags>extensions;utils</PackageTags>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageOutputPath>$(MSBuildThisFileDirectory)..\..\nupkgs</PackageOutputPath>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" Condition="Exists('..\..\README.md')" />
+  </ItemGroup>
+
+</Project>
