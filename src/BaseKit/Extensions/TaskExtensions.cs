@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 
 namespace BaseKit.Extensions
 {
+    /// <summary>متدهای extension برای <see cref="Task"/>/<see cref="Task{TResult}"/>.</summary>
     public static class TaskExtensions
     {
         /// <summary>

@@ -3,6 +3,7 @@ using System.Text.RegularExpressions;
 
 namespace BaseKit.Extensions
 {
+    /// <summary>متدهای extension برای اعتبارسنجی رشته‌های رایج ایرانی/عمومی (کد ملی، موبایل، ایمیل، شبا).</summary>
     public static class ValidationExtensions
     {
         private static readonly Regex EmailRegex =

@@ -68,3 +68,6 @@
   - `TotalPages` — محاسبه‌شده از `TotalCount`/`PageSize`
   - `HasNextPage`, `HasPreviousPage`
   - متد کمکی `ToPagedResult<T>(this IEnumerable<T>, int pageNumber, int pageSize)` که از `Page()` فعلی در `EnumerableExtensions` استفاده می‌کنه و این مدل رو می‌سازه
+- [x] **`Money`** — value object برای مبلغ + واحد پول (`Common/Money.cs`)؛ جمع/تفریق/مقایسه با واحد متفاوت `InvalidOperationException` می‌دهد، `ToMoney(this decimal, string currency)` هم در `NumericExtensions` اضافه شد
+- [x] **Business-day helpers** روی `DateExtensions`: `IsWeekend()` (پنج‌شنبه+جمعه، قابل تنظیم)، `NextWorkingDay()`، `AddWorkingDays()`
+- [x] **Fluent Validator** (`Common/Validator.cs` + `Common/ValidationResult.cs`) — بر خلاف `Guard` که در اولین خطا throw می‌کند، همه‌ی قوانین را چک کرده و لیست کامل خطاها را برمی‌گرداند

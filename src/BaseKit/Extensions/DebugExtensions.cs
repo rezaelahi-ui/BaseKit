@@ -3,6 +3,7 @@ using System.Text.Json;
 
 namespace BaseKit.Extensions
 {
+    /// <summary>ابزارهای کمکی برای دیباگ/لاگ سریع، مبتنی بر <see cref="JsonSerializer"/>.</summary>
     public static class DebugExtensions
     {
         private static readonly JsonSerializerOptions IndentedOptions = new()

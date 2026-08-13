@@ -25,6 +25,7 @@ namespace BaseKit.Common
 
         private readonly ConcurrentDictionary<TKey, Entry> _store = new();
 
+        /// <summary>تعداد آیتم‌های فعلاً ذخیره‌شده (شامل موارد منقضی‌نشده و منقضی‌شده‌ی هنوز حذف‌نشده).</summary>
         public int Count => _store.Count;
 
         /// <summary>ذخیره‌ی یک مقدار؛ اگر <paramref name="expiration"/> داده نشود، مقدار منقضی نمی‌شود.</summary>
@@ -59,8 +60,10 @@ namespace BaseKit.Common
             return value;
         }
 
+        /// <summary>حذف یک کلید از کش (اگر وجود داشته باشد).</summary>
         public void Remove(TKey key) => _store.TryRemove(key, out _);
 
+        /// <summary>حذف همه‌ی آیتم‌های کش.</summary>
         public void Clear() => _store.Clear();
     }
 }

@@ -6,33 +6,40 @@ using BaseKit.Exceptions;
 
 namespace BaseKit.Extensions
 {
+    /// <summary>متدهای extension برای کار با رشته‌های تاریخ (عمدتاً شمسی) و <see cref="DateTime"/>.</summary>
     public static class DateExtensions
     {
+        /// <summary>مقایسه‌ی رشته‌ای دو تاریخ (فرمت YYYY/MM/DD)؛ true اگر <paramref name="date"/> بعد از <paramref name="targetDate"/> باشد.</summary>
         public static bool IsGreaterThan(this string date, string targetDate)
         {
             return string.CompareOrdinal(date, targetDate) > 0;
         }
 
+        /// <summary>مقایسه‌ی رشته‌ای دو تاریخ؛ true اگر <paramref name="date"/> بعد از یا برابر <paramref name="targetDate"/> باشد.</summary>
         public static bool IsGreaterOrEqualsThan(this string date, string targetDate)
         {
             return string.CompareOrdinal(date, targetDate) >= 0;
         }
 
+        /// <summary>مقایسه‌ی رشته‌ای دو تاریخ؛ true اگر <paramref name="date"/> قبل از <paramref name="targetDate"/> باشد.</summary>
         public static bool IsLowerThan(this string date, string targetDate)
         {
             return string.CompareOrdinal(date, targetDate) < 0;
         }
 
+        /// <summary>مقایسه‌ی رشته‌ای دو تاریخ؛ true اگر <paramref name="date"/> قبل از یا برابر <paramref name="targetDate"/> باشد.</summary>
         public static bool IsLowerOrEqualsThan(this string date, string targetDate)
         {
             return string.CompareOrdinal(date, targetDate) <= 0;
         }
 
+        /// <summary>مقایسه‌ی رشته‌ای دو تاریخ؛ true اگر برابر باشند.</summary>
         public static bool IsEqualThan(this string date, string targetDate)
         {
             return string.CompareOrdinal(date, targetDate) == 0;
         }
 
+        /// <summary>محدود کردن تعداد بخش‌های جداشده با <paramref name="separator"/> به <paramref name="count"/> مورد؛ باقی با «...» جایگزین می‌شود.</summary>
         public static string Ellipsis(this string st, int count, string separator = ",")
         {
             if (st.IsEmpty())
@@ -50,6 +57,7 @@ namespace BaseKit.Extensions
             return string.Join($"{separator} ", visibleParts) + $"{separator} ...";
         }
 
+        /// <summary>اگر رشته خالی/null باشد <paramref name="defaultValue"/> (یا رشته‌ی خالی) برمی‌گرداند، وگرنه خود رشته را.</summary>
         public static string GetSafeValue(this string st, object? defaultValue = null)
         {
             if (st.IsEmpty())
@@ -57,6 +65,7 @@ namespace BaseKit.Extensions
             return st;
         }
 
+        /// <summary>تبدیل تاریخ میلادی به رشته‌ی تاریخ شمسی با فرمت YYYY/MM/DD.</summary>
         public static string ToShamsi(this DateTime date)
         {
             try
@@ -70,6 +79,7 @@ namespace BaseKit.Extensions
             }
         }
 
+        /// <summary>تبدیل تاریخ میلادی (پس از افزودن <paramref name="addDay"/> روز) به رشته‌ی تاریخ شمسی.</summary>
         public static string ToShamsi(this DateTime date, int addDay)
         {
             try
@@ -84,6 +94,40 @@ namespace BaseKit.Extensions
             }
         }
 
+        /// <summary>
+        /// بررسی می‌کند تاریخ در تعطیلات آخر هفته‌ی ایران (پنج‌شنبه و جمعه) قرار دارد.
+        /// اگر فقط جمعه به‌عنوان تعطیل رسمی مدنظر است، پارامتر <paramref name="thursdayIsWeekend"/> را false بدهید.
+        /// </summary>
+        public static bool IsWeekend(this DateTime date, bool thursdayIsWeekend = true)
+        {
+            if (date.DayOfWeek == DayOfWeek.Friday) return true;
+            return thursdayIsWeekend && date.DayOfWeek == DayOfWeek.Thursday;
+        }
+
+        /// <summary>نزدیک‌ترین روز کاری بعد از تاریخ داده‌شده (خود تاریخ ورودی را در نظر نمی‌گیرد).</summary>
+        public static DateTime NextWorkingDay(this DateTime date, bool thursdayIsWeekend = true)
+        {
+            var next = date.AddDays(1);
+            while (next.IsWeekend(thursdayIsWeekend))
+                next = next.AddDays(1);
+
+            return next;
+        }
+
+        /// <summary>افزودن N روز کاری (بدون احتساب تعطیلات آخر هفته) به تاریخ.</summary>
+        public static DateTime AddWorkingDays(this DateTime date, int days, bool thursdayIsWeekend = true)
+        {
+            if (days < 0)
+                throw new ArgumentOutOfRangeException(nameof(days), "تعداد روز نمي‌تواند منفي باشد");
+
+            var result = date;
+            for (var i = 0; i < days; i++)
+                result = result.NextWorkingDay(thursdayIsWeekend);
+
+            return result;
+        }
+
+        /// <summary>تبدیل بخش زمان تاریخ به رشته‌ی HH:mm:ss (با تقویم شمسی).</summary>
         public static string ToClock(this DateTime date)
         {
             try
@@ -161,6 +205,7 @@ namespace BaseKit.Extensions
             return a == 0 || a == 1 || b == 0 || c == 0;
         }
 
+        /// <summary>تبدیل رشته‌ی تاریخ شمسی (فرمت YYYY/MM/DD) به <see cref="DateTime"/> میلادی.</summary>
         public static DateTime ToGregorian(this string shamsiDate)
         {
             var pc = new PersianCalendar();

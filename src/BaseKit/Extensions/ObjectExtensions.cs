@@ -2,6 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace BaseKit.Extensions
 {
+    /// <summary>متدهای extension پایه برای بررسی null/empty بودن رشته.</summary>
     public static class ObjectExtensions
     {
         /// <summary>

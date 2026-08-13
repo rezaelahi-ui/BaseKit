@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 namespace BaseKit.Extensions
 {
+    /// <summary>متدهای extension برای کار با <see cref="Exception"/>.</summary>
     public static class ExceptionExtensions
     {
         /// <summary>

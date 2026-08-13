@@ -2,20 +2,29 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using BaseKit.Common;
 
 namespace BaseKit.Extensions
 {
+    /// <summary>متدهای extension برای فرمت‌بندی و تبدیل انواع عددی.</summary>
     public static class NumericExtensions
     {
+        /// <summary>ساخت یک <see cref="Money"/> از مبلغ و واحد پول.</summary>
+        public static Money ToMoney(this decimal amount, string currency) => new(amount, currency);
+
+        /// <summary>فرمت عدد صحیح با جداکننده‌ی هزارگان (مثل 1,234,567).</summary>
         public static string ToSeparatedString(this int value)
             => value.ToString("#,0", CultureInfo.InvariantCulture);
 
+        /// <summary>فرمت عدد صحیح بزرگ با جداکننده‌ی هزارگان.</summary>
         public static string ToSeparatedString(this long value)
             => value.ToString("#,0", CultureInfo.InvariantCulture);
 
+        /// <summary>فرمت عدد اعشاری با جداکننده‌ی هزارگان (حداکثر دو رقم اعشار).</summary>
         public static string ToSeparatedString(this decimal value)
             => value.ToString("#,0.##", CultureInfo.InvariantCulture);
 
+        /// <summary>فرمت عدد اعشاری با جداکننده‌ی هزارگان (حداکثر دو رقم اعشار).</summary>
         public static string ToSeparatedString(this double value)
             => value.ToString("#,0.##", CultureInfo.InvariantCulture);
 

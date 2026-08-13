@@ -7,17 +7,22 @@ using System.Linq.Expressions;
 
 namespace BaseKit.Extensions
 {
+    /// <summary>متدهای extension برای کار با <see cref="IList"/>/<see cref="IEnumerable"/> و <see cref="List{T}"/>.</summary>
     public static class ListExtensions
     {
+        /// <summary>بررسی می‌کند لیست null یا بدون عضو است.</summary>
         public static bool IsEmpty([NotNullWhen(false)] this IList? st)
             => st is null || st.Count == 0;
 
+        /// <summary>بررسی می‌کند دنباله null یا بدون عضو است.</summary>
         public static bool IsEmpty([NotNullWhen(false)] this IEnumerable? enumerable)
             => enumerable is null || !enumerable.Cast<object>().Any();
 
+        /// <summary>بررسی می‌کند دنباله null یا بدون عضو نیست.</summary>
         public static bool IsNotEmpty([NotNullWhen(true)] this IEnumerable? st)
             => !st.IsEmpty();
 
+        /// <summary>ساخت رشته‌ای جداشده با کاما از مقدار انتخاب‌شده‌ی هر عضو لیست.</summary>
         public static string GetJoinedNames<T>(this List<T> st, Expression<Func<T, object>> selector)
         {
             if (st.IsEmpty()) return string.Empty;

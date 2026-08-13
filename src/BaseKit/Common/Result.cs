@@ -8,9 +8,16 @@ namespace BaseKit.Common
     /// </summary>
     public class Result<T>
     {
+        /// <summary>آیا عملیات موفق بوده است.</summary>
         public bool IsSuccess { get; }
+
+        /// <summary>آیا عملیات ناموفق بوده است.</summary>
         public bool IsFailure => !IsSuccess;
+
+        /// <summary>مقدار نتیجه، فقط در حالت موفق معتبر است.</summary>
         public T? Value { get; }
+
+        /// <summary>پیام خطا، فقط در حالت ناموفق مقداردهی می‌شود.</summary>
         public string? Error { get; }
 
         private Result(bool isSuccess, T? value, string? error)
@@ -20,8 +27,10 @@ namespace BaseKit.Common
             Error = error;
         }
 
+        /// <summary>ساخت یک نتیجه‌ی موفق با مقدار مشخص.</summary>
         public static Result<T> Success(T value) => new(true, value, null);
 
+        /// <summary>ساخت یک نتیجه‌ی ناموفق با پیام خطای مشخص.</summary>
         public static Result<T> Failure(string error) => new(false, default, error);
 
         /// <summary>در صورت موفق‌بودن Value را برمی‌گرداند، وگرنه InvalidOperationException می‌دهد.</summary>

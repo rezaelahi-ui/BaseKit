@@ -7,6 +7,7 @@ using BaseKit.Models;
 
 namespace BaseKit.Extensions
 {
+    /// <summary>متدهای extension برای کار با انواع Enum.</summary>
     public static class EnumExtensions
     {
         /// <summary>
@@ -22,6 +23,7 @@ namespace BaseKit.Extensions
             return attribute != null ? attribute.Description : value.ToString();
         }
 
+        /// <summary>تبدیل مقدار Enum به معادل عددی آن.</summary>
         public static int ToInt(this Enum value)
         {
             if (value == null)
@@ -30,6 +32,7 @@ namespace BaseKit.Extensions
             return Convert.ToInt32(value);
         }
 
+        /// <summary>نام قابل‌نمایش (<see cref="Humanize"/>) همه‌ی مقادیر یک نوع Enum.</summary>
         public static List<string> GetAllNames(this Enum @enum)
         {
             var result = new List<string>();
@@ -44,6 +47,7 @@ namespace BaseKit.Extensions
             return result;
         }
 
+        /// <summary>همه‌ی مقادیر یک نوع Enum، به نوع <typeparamref name="T"/> کست‌شده.</summary>
         public static List<T> GetAll<T>(this Enum enumValue)
         {
             var type = enumValue.GetType();
@@ -53,6 +57,7 @@ namespace BaseKit.Extensions
                        .ToList();
         }
 
+        /// <summary>لیست همه‌ی مقادیر Enum به‌صورت (نام، مقدار)، مناسب پرکردن dropdown؛ در صورت درخواست یک گزینه‌ی «همه» هم اضافه می‌شود.</summary>
         public static List<EnumDetail> GetDetails(this Enum enumValue, bool withAll = false)
         {
             var enumType = enumValue.GetType();

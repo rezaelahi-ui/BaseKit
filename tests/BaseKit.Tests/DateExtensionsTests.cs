@@ -116,4 +116,45 @@ public class DateExtensionsTests
     {
         Assert.Throws<AlertException>(() => "9999/01/01".ToGregorian());
     }
+
+    // 2023-03-20 دوشنبه، 2023-03-21 سه‌شنبه، ... 2023-03-23 پنج‌شنبه، 2023-03-24 جمعه، 2023-03-25 شنبه
+    [Theory]
+    [InlineData(2023, 3, 21, true, false)]  // سه‌شنبه، حتی با thursdayIsWeekend=true تعطیل نیست
+    [InlineData(2023, 3, 23, true, true)]   // پنج‌شنبه، وقتی پنج‌شنبه هم تعطیل حساب بشه
+    [InlineData(2023, 3, 23, false, false)] // پنج‌شنبه، وقتی فقط جمعه تعطیل حساب بشه
+    [InlineData(2023, 3, 24, false, true)]  // جمعه، همیشه تعطیل
+    [InlineData(2023, 3, 25, true, false)]  // شنبه، روز کاری
+    public void IsWeekend(int year, int month, int day, bool thursdayIsWeekend, bool expected)
+    {
+        Assert.Equal(expected, new DateTime(year, month, day).IsWeekend(thursdayIsWeekend));
+    }
+
+    [Fact]
+    public void NextWorkingDay_SkipsThursdayAndFriday()
+    {
+        // چهارشنبه 2023-03-22 -> پنج‌شنبه و جمعه تعطیل -> شنبه 2023-03-25
+        var result = new DateTime(2023, 3, 22).NextWorkingDay();
+        Assert.Equal(new DateTime(2023, 3, 25), result);
+    }
+
+    [Fact]
+    public void AddWorkingDays_SkipsWeekendsWhileCounting()
+    {
+        // دوشنبه 2023-03-20 + ۵ روز کاری (با عبور از پنج‌شنبه/جمعه) -> دوشنبه 2023-03-27
+        var result = new DateTime(2023, 3, 20).AddWorkingDays(5);
+        Assert.Equal(new DateTime(2023, 3, 27), result);
+    }
+
+    [Fact]
+    public void AddWorkingDays_ReturnsOriginalDate_WhenZeroDays()
+    {
+        var date = new DateTime(2023, 3, 20);
+        Assert.Equal(date, date.AddWorkingDays(0));
+    }
+
+    [Fact]
+    public void AddWorkingDays_Throws_WhenNegative()
+    {
+        Assert.Throws<ArgumentOutOfRangeException>(() => DateTime.Today.AddWorkingDays(-1));
+    }
 }

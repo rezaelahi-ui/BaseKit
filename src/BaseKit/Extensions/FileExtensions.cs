@@ -4,6 +4,7 @@ using System.Linq;
 
 namespace BaseKit.Extensions
 {
+    /// <summary>متدهای extension برای کار با مسیر فایل/پوشه.</summary>
     public static class FileExtensions
     {
         /// <summary>اگر پوشه‌ی مسیر داده‌شده وجود نداشته باشد آن را می‌سازد؛ خود مسیر را برمی‌گرداند.</summary>

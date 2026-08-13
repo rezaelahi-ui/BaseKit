@@ -4,6 +4,7 @@ using BaseKit.Extensions;
 
 namespace BaseKit.Guards
 {
+    /// <summary>پیاده‌سازی guard clauseهای رایج به‌صورت extension روی <see cref="IGuardClause"/>.</summary>
     public static class GuardClauseExtensions
     {
         /// <summary>اگر <paramref name="value"/> null باشد ArgumentNullException می‌دهد؛ در غیر این صورت خودش را برمی‌گرداند.</summary>

@@ -5,8 +5,10 @@ using BaseKit.Exceptions;
 
 namespace BaseKit.Extensions
 {
+    /// <summary>متدهای extension برای پارس/تبدیل و پردازش رشته.</summary>
     public static class StringExtensions
     {
+        /// <summary>تبدیل رشته (با پشتیبانی از جداکننده‌ی کاما) به عدد صحیح.</summary>
         public static int ToInt(this string str)
         {
             if (str.IsEmpty()) throw new ArgumentNullException(nameof(str), "مقدار وارد شده خالي يا null است");
@@ -17,6 +19,7 @@ namespace BaseKit.Extensions
             return result;
         }
 
+        /// <summary>تبدیل رشته به <see cref="Uri"/>؛ باید با http/https شروع شود.</summary>
         public static Uri ToUri(this string str)
         {
             if (str.IsEmpty())
@@ -36,6 +39,7 @@ namespace BaseKit.Extensions
             return result;
         }
 
+        /// <summary>تبدیل رشته به <see cref="IPAddress"/> (فرمت IPv4، چهار بخش نقطه‌جدا).</summary>
         public static IPAddress ToIp(this string str)
         {
             if (str.IsEmpty())
@@ -48,6 +52,7 @@ namespace BaseKit.Extensions
             return IPAddress.Parse(str);
         }
 
+        /// <summary>تبدیل رشته (با پشتیبانی از جداکننده‌ی کاما) به عدد اعشاری decimal.</summary>
         public static decimal ToDecimal(this string str)
         {
             if (str.IsEmpty()) throw new ArgumentNullException(nameof(str), "مقدار وارد شده خالي يا null است");
@@ -58,6 +63,7 @@ namespace BaseKit.Extensions
             return result;
         }
 
+        /// <summary>تبدیل رشته (با پشتیبانی از جداکننده‌ی کاما) به عدد اعشاری double.</summary>
         public static double ToDouble(this string str)
         {
             if (str.IsEmpty()) throw new ArgumentNullException(nameof(str), "مقدار وارد شده خالي يا null است");
@@ -68,6 +74,7 @@ namespace BaseKit.Extensions
             return result;
         }
 
+        /// <summary>تبدیل رشته (با پشتیبانی از جداکننده‌ی کاما) به عدد صحیح بزرگ long.</summary>
         public static long ToLong(this string str)
         {
             if (str.IsEmpty()) throw new ArgumentNullException(nameof(str), "مقدار وارد شده خالي يا null است");

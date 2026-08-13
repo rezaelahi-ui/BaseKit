@@ -5,6 +5,7 @@ using BaseKit.Common;
 
 namespace BaseKit.Extensions
 {
+    /// <summary>متدهای extension تکمیلی برای <see cref="IEnumerable{T}"/> که در LINQ استاندارد یا نسخه‌های قدیمی .NET وجود ندارند.</summary>
     public static class EnumerableExtensions
     {
         /// <summary>اجرای یک Action روی تک‌تک آیتم‌های دنباله (LINQ همچین متدی ندارد).</summary>

@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 
 namespace BaseKit.Extensions
 {
+    /// <summary>متدهای extension برای اجرای عملیات async با تلاش مجدد (retry).</summary>
     public static class RetryExtensions
     {
         /// <summary>

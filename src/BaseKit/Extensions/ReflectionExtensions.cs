@@ -6,6 +6,7 @@ using System.Text.Json;
 
 namespace BaseKit.Extensions
 {
+    /// <summary>متدهای extension مبتنی بر Reflection/JSON برای clone کردن و بررسی آبجکت‌ها.</summary>
     public static class ReflectionExtensions
     {
         /// <summary>
