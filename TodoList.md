@@ -54,6 +54,14 @@
 - [x] `EnsureDirectoryExists()` — روی مسیر رشته‌ای (نسخه‌ی `FileInfo` فعلاً اضافه نشده)
 - [x] `GetSafeFileName()` — حذف کاراکترهای غیرمجاز از نام فایل
 
+### Fuzzy Matching (شباهت متن)
+- [x] `LevenshteinDistance(this string, string)` — تعداد کمینه‌ی عملیات ویرایشی (insert/delete/replace) برای تبدیل یک رشته به دیگری
+- [x] `SimilarityTo(this string, string)` — درصد شباهت بین ۰ و ۱، محاسبه‌شده از `LevenshteinDistance` (`1 - distance / max(len1, len2)`)
+- [x] `IsSimilarTo(this string, string, double threshold = 0.8)` — true اگر شباهت بیشتر یا مساوی `threshold` باشد
+- [x] `FindBestMatch(this IEnumerable<string>, string query)` — نزدیک‌ترین آیتم لیست به query (بیشترین شباهت)
+- [x] `FindSimilar(this IEnumerable<string>, string query, double threshold = 0.8)` — همه‌ی آیتم‌های لیست که شباهتشان به query حداقل `threshold` است، مرتب‌شده بر اساس شباهت نزولی؛ خروجی `IEnumerable<(string Item, double Score)>`
+  - مثال: `cities.FindSimilar("خوراسان جنوبی", 0.8)` → شامل `("خراسان جنوبی", 0.923)`
+
 ### پکیج‌های جداگانه (وابسته به فریم‌ورک‌های خارجی، نباید در core باشن)
 - [ ] `BaseKit.Extensions.Configuration` — مثل `GetOrDefault<T>(this IConfiguration, string key, T defaultValue)` (وابسته به `Microsoft.Extensions.Configuration.Abstractions`)
 
