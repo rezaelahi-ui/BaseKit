@@ -31,7 +31,7 @@ namespace BaseKit.Extensions
             return source.GetType()
                 .GetProperties(BindingFlags.Public | BindingFlags.Instance)
                 .Where(p => p.GetIndexParameters().Length == 0 && p.CanRead)
-                .ToDictionary(p => p.Name, p => p.GetValue(source));
+                .ToDictionary(p => p.Name, object? (p) => p.GetValue(source));
         }
     }
 }

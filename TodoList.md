@@ -79,3 +79,35 @@
 - [x] **`Money`** — value object برای مبلغ + واحد پول (`Common/Money.cs`)؛ جمع/تفریق/مقایسه با واحد متفاوت `InvalidOperationException` می‌دهد، `ToMoney(this decimal, string currency)` هم در `NumericExtensions` اضافه شد
 - [x] **Business-day helpers** روی `DateExtensions`: `IsWeekend()` (پنج‌شنبه+جمعه، قابل تنظیم)، `NextWorkingDay()`، `AddWorkingDays()`
 - [x] **Fluent Validator** (`Common/Validator.cs` + `Common/ValidationResult.cs`) — بر خلاف `Guard` که در اولین خطا throw می‌کند، همه‌ی قوانین را چک کرده و لیست کامل خطاها را برمی‌گرداند
+
+## Attributes (پورت‌شده از پروژه‌های اصلی)
+
+- [x] **`PersianRegularExpressionAttribute`** (از `AtiranRegularExpression`) — اعتبارسنجی Regex با پیام فارسی؛ برای پراپرتی nullable مقدار خالی را معتبر می‌داند (تشخیص `string?` فقط در .NET 6+ با `NullabilityInfoContext`، برای همین پروژه الان **multi-target شد**: `netstandard2.0;net6.0`)
+- [x] **`GreaterThanAttribute`** — بزرگ‌تر یا مساوی یک آستانه؛ مقدار null نامعتبر تلقی نمی‌شود (الزامی‌بودن مسئولیت `[Required]` است)
+- [x] **`PersianRangeAttribute`** — بازه‌ی [min, max] با پیام فارسی
+- [x] **`PersianRequiredAttribute`** — نسخه‌ی فارسی `RequiredAttribute`، رشته‌ی whitespace را هم نامعتبر می‌داند
+- [x] **`NoteAttribute`** — متادیتای مستندسازی روی متد (Summary/Description)، نه اعتبارسنجی
+
+هر چهار اتریبیوت اعتبارسنجی طبق pattern استاندارد `ValidationAttribute` بازنویسی شدند: به‌جای throw کردن exception، `ValidationResult` ناموفق (یا `false` در overload قدیمی) برمی‌گردانند — سازگار با `Validator.TryValidateObject` و جمع‌آوری همه‌ی خطاها، نه فقط اولین مورد. `BadRequestException` (در `BaseKit.Exceptions`) به‌عنوان یک exception عمومی برای لایه‌ی API نگه داشته شد، ولی دیگر داخل این attributeها پرتاب نمی‌شود.
+
+### Attributes بیشتر (ایده برای آینده)
+
+اعتبارسنجی‌های موجود در `ValidationExtensions` به‌شکل Attribute هم دربیایند تا مستقیم روی پراپرتی مدل (خصوصاً برای ASP.NET/EF Core) قابل استفاده باشند — همه باید طبق pattern فعلی (`ValidationResult`/`bool`، نه throw) پیاده بشن:
+- [ ] `PersianNationalCodeAttribute` — از `IsValidNationalCode()`
+- [ ] `PersianMobileNumberAttribute` — از `IsValidMobileNumber()`
+- [ ] `IranianIbanAttribute` — از `IsValidIban()`
+
+مقایسه‌ی بین دو فیلد (cross-property)، چیزی که DataAnnotations استاندارد پوشش نمی‌دهد:
+- [ ] `CompareToAttribute` — رابطه‌ی `<`/`<=`/`>`/`>=`/`==` بین یک فیلد و فیلد دیگر مدل (BCL فقط `CompareAttribute` برای equality دارد)
+- [ ] `DateRangeAttribute` — نسخه‌ی تخصصی برای بازه‌ی تاریخ (شمسی/میلادی): بررسی این‌که تاریخ شروع قبل از پایان باشد
+
+اعتبارسنجی شرطی:
+- [ ] `RequiredIfAttribute` — یک فیلد فقط وقتی الزامی باشد که فیلد دیگر مدل مقدار خاصی داشته باشد (مثلاً `[RequiredIf(nameof(HasDiscount), true)]`)؛ در DataAnnotations استاندارد معادل ندارد
+
+فایل/آپلود:
+- [ ] `AllowedExtensionsAttribute` — اعتبارسنجی پسوند فایل آپلودی
+- [ ] `MaxFileSizeAttribute` — حداکثر حجم مجاز فایل
+
+متادیتا (نه اعتبارسنجی، شبیه `NoteAttribute`):
+- [ ] `DisplayOrderAttribute` — ترتیب نمایش فیلد در فرم‌های خودکارساز
+- [ ] `AuditIgnoreAttribute` — علامت‌گذاری یک پراپرتی برای نادیده‌گرفتن در سیستم audit trail (در صورت اضافه‌شدن چنین سیستمی به BaseKit در آینده)

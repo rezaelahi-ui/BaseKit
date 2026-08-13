@@ -1,9 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <!-- شروع با netstandard2.0: پوشش .NET Framework 4.6.1+ تا .NET 8/9/10 -->
-    <!-- بعداً اگر لازم شد net461 یا net8.0/net10.0 جداگانه اضافه می‌کنیم -->
-    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <!-- netstandard2.0: پوشش .NET Framework 4.6.1+ تا .NET 5 -->
+    <!-- net6.0: برای APIهایی مثل NullabilityInfoContext که فقط در .NET 6+ موجودند؛
+         پروژه‌های net7/8/9/10 هم به‌طور خودکار از همین asset استفاده می‌کنند (نزدیک‌ترین TFM سازگار). -->
+    <TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -20,6 +21,12 @@
     </PackageReference>
     <!-- برای Clone<T> (سریالایز/دیسریالایز JSON) -->
     <PackageReference Include="System.Text.Json" Version="8.0.5" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+    <!-- System.ComponentModel.DataAnnotations (ValidationAttribute, RegularExpressionAttribute, ...) در net6.0 به‌صورت
+         built-in موجود است؛ در netstandard2.0 باید جدا reference بشه. -->
+    <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
   </ItemGroup>
 
   <PropertyGroup>
