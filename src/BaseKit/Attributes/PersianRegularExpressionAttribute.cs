@@ -37,7 +37,7 @@ namespace BaseKit.Attributes
 
                 return new ValidationResult(
                     $"مقدار {validationContext.DisplayName} نمی‌تواند خالی باشد",
-                    GetMemberNames(validationContext));
+                    ValidationContextHelpers.GetMemberNames(validationContext));
             }
 
             // اعتبارسنجی Regex
@@ -47,14 +47,11 @@ namespace BaseKit.Attributes
                     ? _message
                     : $"قالب {validationContext.DisplayName} درست نیست";
 
-                return new ValidationResult(errorMessage, GetMemberNames(validationContext));
+                return new ValidationResult(errorMessage, ValidationContextHelpers.GetMemberNames(validationContext));
             }
 
             return ValidationResult.Success;
         }
-
-        private static string[]? GetMemberNames(ValidationContext validationContext)
-            => validationContext.MemberName is null ? null : new[] { validationContext.MemberName };
 
         private static bool IsNullableProperty(PropertyInfo? propertyInfo)
         {

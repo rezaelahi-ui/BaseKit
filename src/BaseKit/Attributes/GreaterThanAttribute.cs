@@ -37,20 +37,17 @@ namespace BaseKit.Attributes
             }
             catch (Exception ex) when (ex is FormatException or InvalidCastException)
             {
-                return new ValidationResult("فرمت مقدار وارد شده معتبر نیست", GetMemberNames(validationContext));
+                return new ValidationResult("فرمت مقدار وارد شده معتبر نیست", ValidationContextHelpers.GetMemberNames(validationContext));
             }
 
             if (numericValue < _value)
             {
                 return new ValidationResult(
                     $"مقدار {propertyName} معتبر نیست و باید بزرگ‌تر یا مساوی {_value} باشد",
-                    GetMemberNames(validationContext));
+                    ValidationContextHelpers.GetMemberNames(validationContext));
             }
 
             return ValidationResult.Success;
         }
-
-        private static string[]? GetMemberNames(ValidationContext validationContext)
-            => validationContext.MemberName is null ? null : new[] { validationContext.MemberName };
     }
 }

@@ -90,24 +90,26 @@
 
 هر چهار اتریبیوت اعتبارسنجی طبق pattern استاندارد `ValidationAttribute` بازنویسی شدند: به‌جای throw کردن exception، `ValidationResult` ناموفق (یا `false` در overload قدیمی) برمی‌گردانند — سازگار با `Validator.TryValidateObject` و جمع‌آوری همه‌ی خطاها، نه فقط اولین مورد. `BadRequestException` (در `BaseKit.Exceptions`) به‌عنوان یک exception عمومی برای لایه‌ی API نگه داشته شد، ولی دیگر داخل این attributeها پرتاب نمی‌شود.
 
-### Attributes بیشتر (ایده برای آینده)
+### Attributes بیشتر
 
-اعتبارسنجی‌های موجود در `ValidationExtensions` به‌شکل Attribute هم دربیایند تا مستقیم روی پراپرتی مدل (خصوصاً برای ASP.NET/EF Core) قابل استفاده باشند — همه باید طبق pattern فعلی (`ValidationResult`/`bool`، نه throw) پیاده بشن:
-- [ ] `PersianNationalCodeAttribute` — از `IsValidNationalCode()`
-- [ ] `PersianMobileNumberAttribute` — از `IsValidMobileNumber()`
-- [ ] `IranianIbanAttribute` — از `IsValidIban()`
+اعتبارسنجی‌های موجود در `ValidationExtensions` به‌شکل Attribute هم دراومدن تا مستقیم روی پراپرتی مدل (خصوصاً برای ASP.NET/EF Core) قابل استفاده باشند:
+- [x] `PersianNationalCodeAttribute` — از `IsValidNationalCode()`
+- [x] `PersianMobileNumberAttribute` — از `IsValidMobileNumber()`
+- [x] `IranianIbanAttribute` — از `IsValidIban()`
 
 مقایسه‌ی بین دو فیلد (cross-property)، چیزی که DataAnnotations استاندارد پوشش نمی‌دهد:
-- [ ] `CompareToAttribute` — رابطه‌ی `<`/`<=`/`>`/`>=`/`==` بین یک فیلد و فیلد دیگر مدل (BCL فقط `CompareAttribute` برای equality دارد)
-- [ ] `DateRangeAttribute` — نسخه‌ی تخصصی برای بازه‌ی تاریخ (شمسی/میلادی): بررسی این‌که تاریخ شروع قبل از پایان باشد
+- [x] `CompareToAttribute` — رابطه‌ی `<`/`<=`/`>`/`>=`/`==`/`!=` بین یک فیلد و فیلد دیگر مدل (`CompareType` enum)؛ BCL فقط `CompareAttribute` برای equality دارد
+- [x] `DateRangeAttribute` — بررسی این‌که تاریخ شروع قبل از (یا مساوی) پایان باشد؛ روی `DateTime` و رشته‌های تاریخ (مثل فرمت شمسی) کار می‌کند
 
 اعتبارسنجی شرطی:
-- [ ] `RequiredIfAttribute` — یک فیلد فقط وقتی الزامی باشد که فیلد دیگر مدل مقدار خاصی داشته باشد (مثلاً `[RequiredIf(nameof(HasDiscount), true)]`)؛ در DataAnnotations استاندارد معادل ندارد
+- [x] `RequiredIfAttribute` — یک فیلد فقط وقتی الزامی است که فیلد دیگر مدل مقدار خاصی داشته باشد
 
-فایل/آپلود:
-- [ ] `AllowedExtensionsAttribute` — اعتبارسنجی پسوند فایل آپلودی
-- [ ] `MaxFileSizeAttribute` — حداکثر حجم مجاز فایل
+فایل/آپلود (بدون وابستگی مستقیم به ASP.NET؛ duck-typed روی پراپرتی‌های `FileName`/`Length`):
+- [x] `AllowedExtensionsAttribute`
+- [x] `MaxFileSizeAttribute`
 
 متادیتا (نه اعتبارسنجی، شبیه `NoteAttribute`):
-- [ ] `DisplayOrderAttribute` — ترتیب نمایش فیلد در فرم‌های خودکارساز
-- [ ] `AuditIgnoreAttribute` — علامت‌گذاری یک پراپرتی برای نادیده‌گرفتن در سیستم audit trail (در صورت اضافه‌شدن چنین سیستمی به BaseKit در آینده)
+- [x] `DisplayOrderAttribute`
+- [x] `AuditIgnoreAttribute`
+
+همه‌ی attributeهای اعتبارسنجی از `ValidationContextHelpers.GetMemberNames` مشترک استفاده می‌کنن (کد تکراری بین `GreaterThanAttribute`/`PersianRegularExpressionAttribute` هم جمع شد). همه با null-safe بودن ساخته شدن: مقدار null همیشه معتبره مگر `RequiredIfAttribute` (که دقیقاً برای همین ساخته شده) — الزامی‌بودن مسئولیت `[Required]`/`PersianRequiredAttribute`ه.
