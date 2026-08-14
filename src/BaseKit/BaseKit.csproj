@@ -32,17 +32,19 @@
   <PropertyGroup>
     <!-- NuGet metadata -->
     <PackageId>BaseKit</PackageId>
-    <Version>0.2.0</Version>
+    <Version>0.3.0</Version>
     <Authors>Reza Elahi</Authors>
     <Description>Common extension methods (string/object/...) shared across projects.</Description>
     <PackageTags>extensions;utils</PackageTags>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageOutputPath>$(MSBuildThisFileDirectory)..\..\nupkgs</PackageOutputPath>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
   </PropertyGroup>
 
   <ItemGroup>
     <None Include="..\..\README.md" Pack="true" PackagePath="\" Condition="Exists('..\..\README.md')" />
+    <None Include="..\..\LICENSE" Pack="true" PackagePath="\" Condition="Exists('..\..\LICENSE')" />
   </ItemGroup>
 
 </Project>
