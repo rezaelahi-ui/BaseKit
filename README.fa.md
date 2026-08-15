@@ -1,26 +1,26 @@
 # BaseKit
 
-🇮🇷 [مطالعه به فارسی](README.fa.md)
+🇬🇧 [Read in English](README.md)
 
-A collection of extension methods, attributes, and helper utilities meant to be shared across multiple projects (from .NET Framework 4.6.1 to .NET 10). The main focus is on the needs of Persian/Iranian projects (Shamsi/Jalali dates, national code/mobile/IBAN(Sheba) validation, Persian digits) alongside general-purpose tools (Guard clauses, Result pattern, pagination, simple caching, and more).
+مجموعه‌ای از Extension methodها، Attributeها و ابزارهای کمکی که برای استفاده‌ی مشترک بین پروژه‌های مختلف (از .NET Framework 4.6.1 تا .NET 10) ساخته شده. تمرکز اصلی روی نیازهای پروژه‌های فارسی/ایرانی (تاریخ شمسی، اعتبارسنجی کد ملی/موبایل/شبا، اعداد فارسی) به‌همراه ابزارهای عمومی (Guard clauses، Result pattern، صفحه‌بندی، کش ساده و ...).
 
-## Install
+## نصب
 
 ```bash
 dotnet add package BaseKit
 ```
 
-Target frameworks: `netstandard2.0` (compatible with .NET Framework 4.6.1+ and .NET Core/5+) and `net6.0` (for features like nullable reference type detection, available only in .NET 6+; projects on .NET 7 through 10 automatically use the net6.0-specific build too).
+Target frameworks: `netstandard2.0` (سازگار با .NET Framework 4.6.1+ و .NET Core/5+) و `net6.0` (برای قابلیت‌هایی مثل تشخیص nullable بودن reference typeها که فقط در .NET 6+ در دسترسن؛ پروژه‌های .NET 7 تا 10 هم به‌صورت خودکار از build مخصوص net6.0 استفاده می‌کنن).
 
 ---
 
-## Table of contents
+## فهرست
 
 - [String Extensions](#string-extensions)
 - [Numeric Extensions](#numeric-extensions)
-- [Date Extensions (Shamsi dates)](#date-extensions-shamsi-dates)
+- [Date Extensions (تاریخ شمسی)](#date-extensions-تاریخ-شمسی)
 - [Validation Extensions](#validation-extensions)
-- [Fuzzy Matching](#fuzzy-matching)
+- [Fuzzy Matching (شباهت متن)](#fuzzy-matching-شباهت-متن)
 - [Enum Extensions](#enum-extensions)
 - [Collection Extensions](#collection-extensions)
 - [Object / Reflection Extensions](#object--reflection-extensions)
@@ -43,23 +43,23 @@ Target frameworks: `netstandard2.0` (compatible with .NET Framework 4.6.1+ and .
 ### String Extensions
 
 ```csharp
-"".IsEmpty();                          // true — null/empty/whitespace-only
+"".IsEmpty();                          // true — null/خالی/فقط‌whitespace
 "value".IsNotEmpty();                  // true
 
-"1,234".ToInt();                       // 1234 (supports comma thousands separator)
+"1,234".ToInt();                       // 1234 (پشتیبانی از جداکننده‌ی کاما)
 "1,234.5".ToDecimal();                 // 1234.5m
 "1,234.5".ToDouble();                  // 1234.5
 "123456789012".ToLong();               // 123456789012
 "192.168.1.1".ToIp();                  // IPAddress
-"https://example.com".ToUri();         // Uri (must start with http/https)
-"1".ToBool();                          // true (1/0, true/false, yes/no, بله/خیر)
+"https://example.com".ToUri();         // Uri (باید با http/https شروع بشه)
+"1".ToBool();                          // true (1/0، true/false، yes/no، بله/خیر)
 
 "123".ToPersianDigits();               // "۱۲۳"
-"۱۲۳".ToEnglishDigits();                // "123" (supports both Persian and Arabic digits)
-"كتاب".NormalizeArabicChars();          // "کتاب" (Arabic ي/ك → Persian ی/ک)
+"۱۲۳".ToEnglishDigits();                // "123" (فارسی و عربی هر دو پشتیبانی می‌شن)
+"كتاب".NormalizeArabicChars();          // "کتاب" (ي/ك عربی → ی/ک فارسی)
 
 "09123456789".Mask();                  // "0912***6789"
-"یک متن طولانی است".Truncate(10);       // keeps whole words + "..."
+"یک متن طولانی است".Truncate(10);       // با حفظ کلمه‌ی کامل + "..."
 ```
 
 ### Numeric Extensions
@@ -71,16 +71,16 @@ Target frameworks: `netstandard2.0` (compatible with .NET Framework 4.6.1+ and .
 500m.ToMoney("IRR");                   // Money
 ```
 
-### Date Extensions (Shamsi dates)
+### Date Extensions (تاریخ شمسی)
 
 ```csharp
 DateTime.Now.ToShamsi();               // "1402/01/01"
 DateTime.Now.ToClock();                // "13:05:09"
 "1402/01/01".ToGregorian();            // DateTime
 "1402/01/01".IsValidShamsiDate();      // true
-"1402/02/01".IsGreaterThan("1402/01/01"); // string-based date comparison
+"1402/02/01".IsGreaterThan("1402/01/01"); // مقایسه‌ی رشته‌ای تاریخ‌ها
 
-// working days (Thursday + Friday as weekend by default, configurable)
+// روزهای کاری (پنج‌شنبه + جمعه به‌عنوان تعطیل، قابل تنظیم)
 DateTime.Today.IsWeekend();
 DateTime.Today.NextWorkingDay();
 DateTime.Today.AddWorkingDays(5);
@@ -89,13 +89,13 @@ DateTime.Today.AddWorkingDays(5);
 ### Validation Extensions
 
 ```csharp
-"0499370899".IsValidNationalCode();     // Iranian national code validation with check-digit algorithm
-"09123456789".IsValidMobileNumber();    // Iranian mobile number
+"0499370899".IsValidNationalCode();     // اعتبارسنجی کد ملی با الگوریتم چک‌دیجیت
+"09123456789".IsValidMobileNumber();    // شماره موبایل ایران
 "test@example.com".IsValidEmail();
-"DE89370400440532013000".IsValidIban(); // IBAN/Sheba with standard mod-97 algorithm
+"DE89370400440532013000".IsValidIban(); // شبا/IBAN با الگوریتم استاندارد mod-97
 ```
 
-### Fuzzy Matching
+### Fuzzy Matching (شباهت متن)
 
 ```csharp
 "خراسان جنوبی".LevenshteinDistance("خوراسان جنوبی"); // 1
@@ -110,11 +110,11 @@ cities.FindSimilar("خوراسان جنوبی", threshold: 0.8);    // [("خرا
 ### Enum Extensions
 
 ```csharp
-MyEnum.Value.Humanize();               // from [Description] or the enum name
+MyEnum.Value.Humanize();               // از [Description] یا نام enum
 MyEnum.Value.ToInt();
 MyEnum.Value.GetAllNames();
-MyEnum.Value.GetDetails(withAll: true); // List<EnumDetail> for dropdowns
-"Value".ToEnum<MyEnum>();              // safe parsing with a Persian error message
+MyEnum.Value.GetDetails(withAll: true); // List<EnumDetail> برای dropdown
+"Value".ToEnum<MyEnum>();              // پارس امن با پیام خطای فارسی
 2.ToEnum<MyEnum>();
 ```
 
@@ -123,30 +123,30 @@ MyEnum.Value.GetDetails(withAll: true); // List<EnumDetail> for dropdowns
 ```csharp
 list.IsEmpty();
 list.ForEach(x => Console.WriteLine(x));
-items.ChunkBy(3);                      // split into chunks of 3 (deliberately not named like .NET 6+'s Chunk, to avoid clashing)
-items.DistinctByKey(x => x.Id);        // (deliberately not named like .NET 6+'s DistinctBy)
+items.ChunkBy(3);                      // تقسیم به دسته‌های ۳تایی (هم‌نام با Chunk نت 6+ نیست، بدون تداخل)
+items.DistinctByKey(x => x.Id);        // (هم‌نام با DistinctBy نت 6+ نیست)
 items.Page(pageNumber: 2, pageSize: 20);
-items.ToPagedResult(pageNumber: 2, pageSize: 20); // PagedResult<T> with TotalPages/HasNextPage/...
+items.ToPagedResult(pageNumber: 2, pageSize: 20); // PagedResult<T> با TotalPages/HasNextPage/...
 oldList.HasChanges(newList);
 ```
 
 ### Object / Reflection Extensions
 
 ```csharp
-var clone = myObject.Clone();          // deep clone via JSON serialize/deserialize
-var dict = myObject.ToDictionary();    // Dictionary<string, object?> of public properties
+var clone = myObject.Clone();          // deep clone با JSON serialize/deserialize
+var dict = myObject.ToDictionary();    // Dictionary<string, object?> از پراپرتی‌های public
 ```
 
 ### Exception Extensions
 
 ```csharp
-exception.GetFullMessage();            // full message including all InnerExceptions
+exception.GetFullMessage();            // پیام کامل شامل همه‌ی InnerExceptionها
 ```
 
 ### Task Extensions
 
 ```csharp
-await someTask.WithTimeout(TimeSpan.FromSeconds(5));   // throws TimeoutException on timeout
+await someTask.WithTimeout(TimeSpan.FromSeconds(5));   // TimeoutException در صورت تایم‌اوت
 
 Func<Task<int>> operation = () => CallExternalServiceAsync();
 await operation.RetryAsync(retryCount: 3, delay: TimeSpan.FromSeconds(1));
@@ -156,13 +156,13 @@ await operation.RetryAsync(retryCount: 3, delay: TimeSpan.FromSeconds(1));
 
 ```csharp
 @"C:\logs\app".EnsureDirectoryExists();
-"report:2024/06.pdf".GetSafeFileName(); // strips characters not allowed in file names
+"report:2024/06.pdf".GetSafeFileName(); // حذف کاراکترهای غیرمجاز
 ```
 
 ### Debug / Logging Extensions
 
 ```csharp
-myObject.Dump();                       // readable JSON for quick debugging
+myObject.Dump();                       // JSON خوانا برای دیباگ سریع
 myObject.ToJson();
 json.FromJson<MyDto>();
 ```
@@ -175,7 +175,7 @@ await IPAddress.Parse("8.8.8.8").Ping();
 
 ### Common: Money
 
-A value object for an amount + currency; prevents type-unsafe addition/subtraction/comparison between two different currencies.
+Value object برای مبلغ + واحد پول؛ از جمع/تفریق/مقایسه‌ی دو واحد پول متفاوت به‌صورت type-safe جلوگیری می‌کند.
 
 ```csharp
 var a = new Money(100_000, "IRR");
@@ -186,7 +186,7 @@ a + new Money(10, "USD");              // InvalidOperationException
 
 ### Common: Result\<T\>
 
-An alternative to throwing exceptions for predictable error paths.
+جایگزین throw کردن exception برای مسیرهای خطای قابل‌پیش‌بینی.
 
 ```csharp
 Result<User> result = userId > 0
@@ -205,7 +205,7 @@ PagedResult<Customer> page = customers.ToPagedResult(pageNumber: 2, pageSize: 20
 
 ### Common: Validator (Fluent)
 
-Unlike Guard, which throws on the first error, this checks every rule and returns the full list of errors — useful for forms that need to display all errors at once.
+بر خلاف Guard که در اولین خطا throw می‌کند، همه‌ی قوانین را چک کرده و لیست کامل خطاها را برمی‌گرداند — مناسب فرم‌هایی که باید همه‌ی خطاها را یک‌جا نشان دهند.
 
 ```csharp
 var result = Validator<UserDto>.For(dto)
@@ -218,7 +218,7 @@ if (!result.IsValid) { /* result.Errors */ }
 
 ### Common: SimpleCache
 
-A simple in-memory cache with expiration support; for small projects that don't need Redis/MemoryCache.
+کش in-memory ساده با پشتیبانی از expiration؛ برای پروژه‌های کوچکی که نیازی به Redis/MemoryCache ندارند.
 
 ```csharp
 var cache = new SimpleCache<string, User>();
@@ -280,24 +280,24 @@ public class RegisterDto
 }
 ```
 
-All of these attributes follow the standard `ValidationAttribute` pattern (returning `ValidationResult`/`bool` instead of throwing), so they work with `Validator.TryValidateObject` and any DataAnnotations-based library (ASP.NET Core model binding, EF Core, etc.).
+همه‌ی این attributeها طبق pattern استاندارد `ValidationAttribute` کار می‌کنن (برگرداندن `ValidationResult`/`bool`، نه throw)، پس با `Validator.TryValidateObject` و کتابخانه‌های مبتنی بر DataAnnotations (ASP.NET Core model binding، EF Core و ...) سازگارن.
 
-Non-validation metadata is also available: `[Note]` (method documentation), `[DisplayOrder]`, `[AuditIgnore]`.
+متادیتای غیر-اعتبارسنجی هم موجوده: `[Note]` (مستندسازی متد)، `[DisplayOrder]`، `[AuditIgnore]`.
 
 ### Exceptions
 
-- `AlertException` — a message meant to be shown directly to the end user
-- `BadRequestException` — typically maps to HTTP 400 (for input validation errors in APIs)
+- `AlertException` — پیام قابل‌نمایش مستقیم به کاربر نهایی
+- `BadRequestException` — معمولاً باید به HTTP 400 نگاشت بشه (برای خطاهای اعتبارسنجی ورودی در APIها)
 
 ---
 
-## Repository layout
+## ساختار مخزن
 
 ```
-src/BaseKit/            core library code
-tests/BaseKit.Tests/    unit tests (xUnit, Theory-based)
-nupkgs/                 packed output (git-ignored)
-local-feed/             local NuGet feed for testing package consumption (git-ignored)
+src/BaseKit/            کد اصلی کتابخانه
+tests/BaseKit.Tests/    تست‌های واحد (xUnit، Theory-based)
+nupkgs/                 خروجی pack شده (git-ignored)
+local-feed/             فید لوکال NuGet برای تست مصرف پکیج (git-ignored)
 ```
 
 ## Build & Pack
@@ -307,4 +307,4 @@ dotnet build
 dotnet pack -c Release
 ```
 
-The `.nupkg` output is placed in the `nupkgs/` folder.
+خروجی `.nupkg` در پوشه‌ی `nupkgs/` قرار می‌گیرد.
