@@ -36,6 +36,8 @@
     <Authors>Reza Elahi</Authors>
     <Description>Common extension methods (string/object/...) shared across projects.</Description>
     <PackageTags>extensions;utils</PackageTags>
+    <RepositoryUrl>https://github.com/rezaelahi-ui/BaseKit</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageOutputPath>$(MSBuildThisFileDirectory)..\..\nupkgs</PackageOutputPath>
     <PackageReadmeFile>README.md</PackageReadmeFile>
