@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Text.Json;
 
 namespace BaseKit.Extensions
@@ -24,6 +25,28 @@ namespace BaseKit.Extensions
         {
             if (json.IsEmpty()) throw new ArgumentNullException(nameof(json), "مقدار وارد شده خالي يا null است");
             return JsonSerializer.Deserialize<T>(json);
+        }
+
+        /// <summary>اجرای یک <see cref="Action"/> و اندازه‌گیری زمان اجرای آن؛ برای پروفایلینگ سریع بدون <see cref="Stopwatch"/> دستی.</summary>
+        public static TimeSpan Measure(this Action action)
+        {
+            if (action is null) throw new ArgumentNullException(nameof(action));
+
+            var stopwatch = Stopwatch.StartNew();
+            action();
+            stopwatch.Stop();
+            return stopwatch.Elapsed;
+        }
+
+        /// <summary>اجرای یک <see cref="Func{T}"/>، برگرداندن نتیجه به‌همراه زمان اجرا.</summary>
+        public static (T Result, TimeSpan Elapsed) Measure<T>(this Func<T> func)
+        {
+            if (func is null) throw new ArgumentNullException(nameof(func));
+
+            var stopwatch = Stopwatch.StartNew();
+            var result = func();
+            stopwatch.Stop();
+            return (result, stopwatch.Elapsed);
         }
     }
 }

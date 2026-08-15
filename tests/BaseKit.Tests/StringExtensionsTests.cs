@@ -212,4 +212,30 @@ public class StringExtensionsTests
     {
         Assert.Throws<ArgumentOutOfRangeException>(() => "test".Truncate(-1));
     }
+
+    [Theory]
+    [InlineData("hgt", "الف")]
+    [InlineData("sghl", "سلام")]
+    [InlineData("123", "123")] // ارقام بدون تغییر
+    public void ToPersianKeyboard_ConvertsEnglishTypedText(string input, string expected)
+    {
+        Assert.Equal(expected, input.ToPersianKeyboard());
+    }
+
+    [Theory]
+    [InlineData("الف", "hgt")]
+    [InlineData("سلام", "sghl")]
+    [InlineData("123", "123")]
+    public void ToEnglishKeyboard_ConvertsPersianTypedText(string input, string expected)
+    {
+        Assert.Equal(expected, input.ToEnglishKeyboard());
+    }
+
+    [Fact]
+    public void ToPersianKeyboard_ToEnglishKeyboard_AreRoundTrippable()
+    {
+        const string english = "hpd slj q,akndg";
+        var persian = english.ToPersianKeyboard();
+        Assert.Equal(english, persian.ToEnglishKeyboard());
+    }
 }

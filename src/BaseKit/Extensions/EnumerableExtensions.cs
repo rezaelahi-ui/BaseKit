@@ -93,5 +93,36 @@ namespace BaseKit.Extensions
 
             return new PagedResult<T>(items, pageNumber, pageSize, materialized.Count);
         }
+
+        /// <summary>
+        /// به‌هم‌ریختن ترتیب لیست به‌صورت درجا (in-place) با الگوریتم Fisher-Yates.
+        /// از <see cref="Random"/> عادی استفاده می‌کند؛ برای مصارف امنیتی/رمزنگاری مناسب نیست.
+        /// </summary>
+        public static void Shuffle<T>(this IList<T> list)
+        {
+            if (list is null) throw new ArgumentNullException(nameof(list));
+
+            var random = new Random();
+            for (var i = list.Count - 1; i > 0; i--)
+            {
+                var j = random.Next(i + 1);
+                (list[i], list[j]) = (list[j], list[i]);
+            }
+        }
+
+        /// <summary>
+        /// انتخاب تصادفی یک آیتم از دنباله. اگر دنباله خالی باشد <see cref="InvalidOperationException"/> می‌دهد.
+        /// از <see cref="Random"/> عادی استفاده می‌کند؛ برای مصارف امنیتی/رمزنگاری مناسب نیست.
+        /// </summary>
+        public static T RandomItem<T>(this IEnumerable<T> source)
+        {
+            if (source is null) throw new ArgumentNullException(nameof(source));
+
+            var materialized = source as IReadOnlyList<T> ?? source.ToList();
+            if (materialized.Count == 0)
+                throw new InvalidOperationException("دنباله خالي است");
+
+            return materialized[new Random().Next(materialized.Count)];
+        }
     }
 }

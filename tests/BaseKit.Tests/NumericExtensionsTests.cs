@@ -1,3 +1,4 @@
+using System;
 using BaseKit.Extensions;
 
 namespace BaseKit.Tests;
@@ -62,5 +63,28 @@ public class NumericExtensionsTests
     public void ToPersianWords(long input, string expected)
     {
         Assert.Equal(expected, input.ToPersianWords());
+    }
+
+    [Theory]
+    [InlineData(0, "صفرم")]
+    [InlineData(1, "اول")]
+    [InlineData(2, "دوم")]
+    [InlineData(3, "سوم")]
+    [InlineData(4, "چهارم")]
+    [InlineData(10, "دهم")]
+    [InlineData(20, "بیستم")]
+    [InlineData(21, "بیست و یکم")]
+    [InlineData(23, "بیست و سوم")]
+    [InlineData(30, "سی‌ام")]
+    [InlineData(100, "صدم")]
+    public void ToPersianOrdinalWords(long input, string expected)
+    {
+        Assert.Equal(expected, input.ToPersianOrdinalWords());
+    }
+
+    [Fact]
+    public void ToPersianOrdinalWords_Throws_WhenNegative()
+    {
+        Assert.Throws<ArgumentOutOfRangeException>(() => (-1L).ToPersianOrdinalWords());
     }
 }

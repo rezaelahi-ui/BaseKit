@@ -1,8 +1,10 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 using BaseKit.Exceptions;
+using BaseKit.Models;
 
 namespace BaseKit.Extensions
 {
@@ -227,6 +229,267 @@ namespace BaseKit.Extensions
             {
                 return new DateTime();
             }
+        }
+
+        private static readonly string[] PersianMonthNames =
+        {
+            "", "فروردین", "اردیبهشت", "خرداد", "تیر", "مرداد", "شهریور",
+            "مهر", "آبان", "آذر", "دی", "بهمن", "اسفند"
+        };
+
+        // اندیس‌ها با System.DayOfWeek هم‌راستا هستند (یکشنبه=۰ تا شنبه=۶).
+        private static readonly string[] PersianDayNames =
+        {
+            "یکشنبه", "دوشنبه", "سه‌شنبه", "چهارشنبه", "پنج‌شنبه", "جمعه", "شنبه"
+        };
+
+        private static readonly string[] PersianSeasonNames = { "بهار", "تابستان", "پاییز", "زمستان" };
+
+        // تعطیلات رسمی ایران که تاریخ‌شان در تقویم شمسی ثابت است (مثل نوروز)؛ فرمت "MM/DD".
+        // تعطیلات مذهبی/قمری (عاشورا، اعیاد و ...) چون سال به سال جابه‌جا می‌شوند اینجا نیستند و باید
+        // از طریق پارامتر extraHolidaysShamsi در IsIranianHoliday به‌ازای هر سال جداگانه داده شوند.
+        private static readonly HashSet<string> FixedShamsiHolidaysMonthDay = new()
+        {
+            "01/01", "01/02", "01/03", "01/04", // نوروز
+            "01/12", // روز جمهوری اسلامی
+            "01/13", // سیزده‌بدر
+            "03/14", // رحلت امام خمینی
+            "03/15", // قیام ۱۵ خرداد
+            "11/22", // پیروزی انقلاب اسلامی
+            "12/29", // روز ملی شدن صنعت نفت
+        };
+
+        /// <summary>نام فارسی ماه شمسیِ تاریخ (مثل «فروردین»).</summary>
+        public static string GetPersianMonthName(this DateTime date)
+        {
+            var pc = new PersianCalendar();
+            return PersianMonthNames[pc.GetMonth(date)];
+        }
+
+        /// <summary>نام فارسی روز هفته‌ی تاریخ (مثل «شنبه»)؛ در تقویم میلادی و شمسی یکسان است.</summary>
+        public static string GetPersianDayName(this DateTime date) => PersianDayNames[(int)date.DayOfWeek];
+
+        /// <summary>نام فارسی فصلِ تاریخ در تقویم شمسی (مثل «بهار»).</summary>
+        public static string GetPersianSeason(this DateTime date)
+        {
+            var pc = new PersianCalendar();
+            var month = pc.GetMonth(date);
+            return PersianSeasonNames[(month - 1) / 3];
+        }
+
+        /// <summary>سال شمسی تاریخ، به‌صورت عدد (بدون نیاز به parse کردن خروجی رشته‌ای <see cref="ToShamsi(DateTime)"/>).</summary>
+        public static int GetShamsiYear(this DateTime date) => new PersianCalendar().GetYear(date);
+
+        /// <summary>ماه شمسی تاریخ (۱ تا ۱۲)، به‌صورت عدد.</summary>
+        public static int GetShamsiMonth(this DateTime date) => new PersianCalendar().GetMonth(date);
+
+        /// <summary>
+        /// بررسی می‌کند تاریخ، تعطیل رسمی ایران است: آخر هفته (<see cref="IsWeekend"/>) یا یکی از
+        /// تعطیلات ثابت شمسی (نوروز و مشابه). تعطیلات مذهبی/قمری هرساله جابه‌جا می‌شوند، پس باید
+        /// از طریق <paramref name="extraHolidaysShamsi"/> (رشته‌های تاریخ شمسی YYYY/MM/DD) اضافه شوند.
+        /// </summary>
+        public static bool IsIranianHoliday(this DateTime date, IEnumerable<string>? extraHolidaysShamsi = null, bool thursdayIsWeekend = true)
+        {
+            if (date.IsWeekend(thursdayIsWeekend)) return true;
+
+            var shamsi = date.ToShamsi();
+            if (shamsi.Length == 10 && FixedShamsiHolidaysMonthDay.Contains(shamsi.Substring(5)))
+                return true;
+
+            if (extraHolidaysShamsi is null) return false;
+
+            foreach (var extra in extraHolidaysShamsi)
+            {
+                if (extra.IsNotEmpty() && extra.Trim() == shamsi)
+                    return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// اطلاعات کامل تاریخ در تقویم شمسی: سال/ماه/روز/نام‌ها، به‌همراه بازه‌ی شروع و پایان
+        /// ماه، فصل و سالی که این تاریخ در آن قرار دارد.
+        /// </summary>
+        public static PersianDateInfo GetPersianDateInfo(this DateTime date)
+        {
+            var pc = new PersianCalendar();
+            var year = pc.GetYear(date);
+            var month = pc.GetMonth(date);
+            var day = pc.GetDayOfMonth(date);
+
+            var seasonIndex = (month - 1) / 3;
+            var seasonStartMonth = seasonIndex * 3 + 1;
+            var seasonEndMonth = seasonStartMonth + 2;
+
+            var daysInMonth = pc.GetDaysInMonth(year, month);
+            var seasonEndDaysInMonth = pc.GetDaysInMonth(year, seasonEndMonth);
+            var yearEndDaysInMonth = pc.GetDaysInMonth(year, 12);
+
+            return new PersianDateInfo
+            {
+                Year = year,
+                Month = month,
+                Day = day,
+                DayOfWeek = date.DayOfWeek,
+                DayName = PersianDayNames[(int)date.DayOfWeek],
+                MonthName = PersianMonthNames[month],
+                SeasonName = PersianSeasonNames[seasonIndex],
+                DaysInMonth = daysInMonth,
+                DaysInYear = pc.GetDaysInYear(year),
+                ShamsiDate = $"{year:0000}/{month:00}/{day:00}",
+                MonthStartShamsi = $"{year:0000}/{month:00}/01",
+                MonthEndShamsi = $"{year:0000}/{month:00}/{daysInMonth:00}",
+                SeasonStartShamsi = $"{year:0000}/{seasonStartMonth:00}/01",
+                SeasonEndShamsi = $"{year:0000}/{seasonEndMonth:00}/{seasonEndDaysInMonth:00}",
+                YearStartShamsi = $"{year:0000}/01/01",
+                YearEndShamsi = $"{year:0000}/12/{yearEndDaysInMonth:00}",
+                MonthStartDate = new DateTime(year, month, 1, pc),
+                MonthEndDate = new DateTime(year, month, daysInMonth, pc),
+                SeasonStartDate = new DateTime(year, seasonStartMonth, 1, pc),
+                SeasonEndDate = new DateTime(year, seasonEndMonth, seasonEndDaysInMonth, pc),
+                YearStartDate = new DateTime(year, 1, 1, pc),
+                YearEndDate = new DateTime(year, 12, yearEndDaysInMonth, pc),
+            };
+        }
+
+        /// <summary>
+        /// تفکیک یک ماه شمسی به هفته‌ها (هر هفته از شنبه شروع می‌شود؛ هفته‌ی اول/آخر به بازه‌ی ماه محدود می‌شود).
+        /// </summary>
+        public static List<WeekInfo> GetWeeksOfShamsiMonth(this int year, int month)
+        {
+            if (month < 1 || month > 12)
+                throw new ArgumentOutOfRangeException(nameof(month), "ماه بايد بين ۱ تا ۱۲ باشد");
+
+            var pc = new PersianCalendar();
+            var daysInMonth = pc.GetDaysInMonth(year, month);
+            var firstDay = new DateTime(year, month, 1, pc);
+            var lastDay = new DateTime(year, month, daysInMonth, pc);
+
+            var current = firstDay;
+            while (current.DayOfWeek != DayOfWeek.Saturday)
+                current = current.AddDays(-1);
+
+            var weeks = new List<WeekInfo>();
+            var weekNumber = 1;
+            var now = DateTime.Now;
+
+            while (current <= lastDay)
+            {
+                var effectiveStart = current < firstDay ? firstDay : current;
+                var weekEnd = current.AddDays(6);
+                var effectiveEnd = weekEnd > lastDay ? lastDay : weekEnd;
+
+                weeks.Add(new WeekInfo
+                {
+                    WeekNumber = weekNumber,
+                    StartDate = effectiveStart,
+                    EndDate = effectiveEnd,
+                    StartDateShamsi = effectiveStart.ToShamsi(),
+                    EndDateShamsi = effectiveEnd.ToShamsi(),
+                    IsComplete = effectiveEnd <= now,
+                });
+
+                weekNumber++;
+                current = current.AddDays(7);
+            }
+
+            return weeks;
+        }
+
+        /// <summary>تفکیک یک فصل شمسی (که با <paramref name="seasonStartMonth"/> یکی از ۱، ۴، ۷ یا ۱۰ مشخص می‌شود) به سه ماه.</summary>
+        public static List<MonthInfo> GetMonthsOfShamsiSeason(this int year, int seasonStartMonth)
+        {
+            if (seasonStartMonth != 1 && seasonStartMonth != 4 && seasonStartMonth != 7 && seasonStartMonth != 10)
+                throw new ArgumentOutOfRangeException(nameof(seasonStartMonth), "ماه شروع فصل بايد يکي از ۱، ۴، ۷ يا ۱۰ باشد");
+
+            var pc = new PersianCalendar();
+            var months = new List<MonthInfo>();
+            var now = DateTime.Now;
+
+            for (var i = 0; i < 3; i++)
+            {
+                var currentMonth = seasonStartMonth + i;
+                var currentYear = year;
+                if (currentMonth > 12)
+                {
+                    currentMonth -= 12;
+                    currentYear++;
+                }
+
+                var daysInMonth = pc.GetDaysInMonth(currentYear, currentMonth);
+                var startDate = new DateTime(currentYear, currentMonth, 1, pc);
+                var endDate = new DateTime(currentYear, currentMonth, daysInMonth, pc);
+
+                months.Add(new MonthInfo
+                {
+                    Year = currentYear,
+                    MonthNumber = currentMonth,
+                    MonthName = PersianMonthNames[currentMonth],
+                    StartDate = startDate,
+                    EndDate = endDate,
+                    StartDateShamsi = startDate.ToShamsi(),
+                    EndDateShamsi = endDate.ToShamsi(),
+                    IsComplete = endDate <= now,
+                });
+            }
+
+            return months;
+        }
+
+        /// <summary>تفکیک یک سال شمسی به چهار فصل (بهار تا زمستان).</summary>
+        public static List<SeasonInfo> GetSeasonsOfShamsiYear(this int year)
+        {
+            var pc = new PersianCalendar();
+            var seasons = new List<SeasonInfo>();
+            var seasonStartMonths = new[] { 1, 4, 7, 10 };
+            var now = DateTime.Now;
+
+            for (var i = 0; i < 4; i++)
+            {
+                var startMonth = seasonStartMonths[i];
+                var endMonth = startMonth + 2;
+                var endDaysInMonth = pc.GetDaysInMonth(year, endMonth);
+
+                var startDate = new DateTime(year, startMonth, 1, pc);
+                var endDate = new DateTime(year, endMonth, endDaysInMonth, pc);
+
+                seasons.Add(new SeasonInfo
+                {
+                    SeasonNumber = i + 1,
+                    SeasonName = PersianSeasonNames[i],
+                    StartDate = startDate,
+                    EndDate = endDate,
+                    StartDateShamsi = startDate.ToShamsi(),
+                    EndDateShamsi = endDate.ToShamsi(),
+                    IsComplete = endDate <= now,
+                });
+            }
+
+            return seasons;
+        }
+
+        /// <summary>
+        /// ترکیب یک تاریخ شمسی (YYYY/MM/DD) و رشته‌ی ساعت ("HH:mm" یا "HH:mm:ss") به Unix timestamp
+        /// (میلی‌ثانیه، UTC)؛ برای مواردی که تاریخ و ساعت جدا از هم ذخیره شده‌اند.
+        /// </summary>
+        public static long ToUnixTimestamp(this string shamsiDate, string time)
+        {
+            if (time.IsEmpty()) throw new ArgumentNullException(nameof(time), "مقدار وارد شده خالي يا null است");
+
+            var timeParts = time.Trim().Split(':');
+            if (timeParts.Length is < 2 or > 3 ||
+                !int.TryParse(timeParts[0], out var hour) || hour is < 0 or > 23 ||
+                !int.TryParse(timeParts[1], out var minute) || minute is < 0 or > 59)
+                throw new FormatException($"فرمت ساعت وارد شده {time} قابل تبديل نيست");
+
+            var second = 0;
+            if (timeParts.Length == 3 && (!int.TryParse(timeParts[2], out second) || second is < 0 or > 59))
+                throw new FormatException($"فرمت ساعت وارد شده {time} قابل تبديل نيست");
+
+            var gregorianDate = shamsiDate.ToGregorian();
+            var dateTime = new DateTime(gregorianDate.Year, gregorianDate.Month, gregorianDate.Day, hour, minute, second, DateTimeKind.Utc);
+            return new DateTimeOffset(dateTime).ToUnixTimeMilliseconds();
         }
     }
 }

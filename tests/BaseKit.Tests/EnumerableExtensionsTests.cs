@@ -95,4 +95,43 @@ public class EnumerableExtensionsTests
         IEnumerable<int>? source = null;
         Assert.Throws<ArgumentNullException>(() => source!.ToPagedResult(1, 10));
     }
+
+    [Fact]
+    public void Shuffle_KeepsSameElements_ButMayReorder()
+    {
+        var list = Enumerable.Range(1, 20).ToList();
+        var original = list.ToList();
+
+        list.Shuffle();
+
+        Assert.Equal(original.OrderBy(x => x), list.OrderBy(x => x));
+    }
+
+    [Fact]
+    public void Shuffle_Throws_WhenListNull()
+    {
+        IList<int>? list = null;
+        Assert.Throws<ArgumentNullException>(() => list!.Shuffle());
+    }
+
+    [Fact]
+    public void RandomItem_ReturnsItemFromSource()
+    {
+        var items = new[] { 1, 2, 3, 4, 5 };
+        var picked = items.RandomItem();
+        Assert.Contains(picked, items);
+    }
+
+    [Fact]
+    public void RandomItem_Throws_WhenSourceEmpty()
+    {
+        Assert.Throws<InvalidOperationException>(() => Array.Empty<int>().RandomItem());
+    }
+
+    [Fact]
+    public void RandomItem_Throws_WhenSourceNull()
+    {
+        IEnumerable<int>? source = null;
+        Assert.Throws<ArgumentNullException>(() => source!.RandomItem());
+    }
 }

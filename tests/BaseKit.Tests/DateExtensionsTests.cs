@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using BaseKit.Exceptions;
 using BaseKit.Extensions;
 
@@ -156,5 +157,187 @@ public class DateExtensionsTests
     public void AddWorkingDays_Throws_WhenNegative()
     {
         Assert.Throws<ArgumentOutOfRangeException>(() => DateTime.Today.AddWorkingDays(-1));
+    }
+
+    [Fact]
+    public void GetPersianMonthName_And_GetPersianSeason_ForFarvardin()
+    {
+        var date = new DateTime(2023, 3, 21); // 1402/01/01
+        Assert.Equal("فروردین", date.GetPersianMonthName());
+        Assert.Equal("بهار", date.GetPersianSeason());
+    }
+
+    [Fact]
+    public void GetPersianMonthName_And_GetPersianSeason_ForTir()
+    {
+        var date = "1402/04/01".ToGregorian();
+        Assert.Equal("تیر", date.GetPersianMonthName());
+        Assert.Equal("تابستان", date.GetPersianSeason());
+    }
+
+    // 2023-03-19 یکشنبه تا 2023-03-25 شنبه (هم‌راستا با کامنت خط ۱۲۰)
+    [Theory]
+    [InlineData(2023, 3, 19, "یکشنبه")]
+    [InlineData(2023, 3, 20, "دوشنبه")]
+    [InlineData(2023, 3, 21, "سه‌شنبه")]
+    [InlineData(2023, 3, 22, "چهارشنبه")]
+    [InlineData(2023, 3, 23, "پنج‌شنبه")]
+    [InlineData(2023, 3, 24, "جمعه")]
+    [InlineData(2023, 3, 25, "شنبه")]
+    public void GetPersianDayName(int year, int month, int day, string expected)
+    {
+        Assert.Equal(expected, new DateTime(year, month, day).GetPersianDayName());
+    }
+
+    [Fact]
+    public void GetShamsiYear_And_GetShamsiMonth()
+    {
+        var date = new DateTime(2023, 3, 21); // 1402/01/01
+        Assert.Equal(1402, date.GetShamsiYear());
+        Assert.Equal(1, date.GetShamsiMonth());
+    }
+
+    [Fact]
+    public void IsIranianHoliday_True_ForNowruz()
+    {
+        Assert.True(new DateTime(2023, 3, 21).IsIranianHoliday()); // 1402/01/01
+    }
+
+    [Fact]
+    public void IsIranianHoliday_True_ForFriday()
+    {
+        Assert.True(new DateTime(2023, 3, 24).IsIranianHoliday()); // جمعه
+    }
+
+    [Fact]
+    public void IsIranianHoliday_False_ForOrdinaryWorkday()
+    {
+        Assert.False(new DateTime(2023, 3, 26).IsIranianHoliday()); // 1402/01/06، یکشنبه، عادی
+    }
+
+    [Fact]
+    public void IsIranianHoliday_RespectsThursdayIsWeekendFlag()
+    {
+        var thursday = new DateTime(2023, 3, 30); // 1402/01/10، خارج از تعطیلات ثابت نوروز
+        Assert.True(thursday.IsIranianHoliday(thursdayIsWeekend: true));
+        Assert.False(thursday.IsIranianHoliday(thursdayIsWeekend: false));
+    }
+
+    [Fact]
+    public void IsIranianHoliday_True_ForCustomExtraHoliday()
+    {
+        var date = new DateTime(2023, 3, 26); // 1402/01/06، عادی مگر با extra
+        Assert.True(date.IsIranianHoliday(new[] { "1402/01/06" }, thursdayIsWeekend: false));
+    }
+
+    [Fact]
+    public void GetPersianDateInfo_ReturnsExpectedValues_ForFarvardinFirst()
+    {
+        var date = new DateTime(2023, 3, 21); // 1402/01/01، سه‌شنبه
+        var info = date.GetPersianDateInfo();
+
+        Assert.Equal(1402, info.Year);
+        Assert.Equal(1, info.Month);
+        Assert.Equal(1, info.Day);
+        Assert.Equal(DayOfWeek.Tuesday, info.DayOfWeek);
+        Assert.Equal("سه‌شنبه", info.DayName);
+        Assert.Equal("فروردین", info.MonthName);
+        Assert.Equal("بهار", info.SeasonName);
+        Assert.Equal(31, info.DaysInMonth);
+        Assert.Equal("1402/01/01", info.ShamsiDate);
+        Assert.Equal("1402/01/01", info.MonthStartShamsi);
+        Assert.Equal("1402/01/31", info.MonthEndShamsi);
+        Assert.Equal("1402/01/01", info.SeasonStartShamsi);
+        Assert.Equal("1402/03/31", info.SeasonEndShamsi);
+        Assert.Equal("1402/01/01", info.YearStartShamsi);
+        Assert.Equal(date, info.MonthStartDate);
+        Assert.Equal(date, info.SeasonStartDate);
+        Assert.Equal(date, info.YearStartDate);
+    }
+
+    [Fact]
+    public void GetWeeksOfShamsiMonth_FirstWeekIsClippedToMonthStart()
+    {
+        var weeks = 1402.GetWeeksOfShamsiMonth(1);
+
+        var firstWeek = weeks[0];
+        Assert.Equal(1, firstWeek.WeekNumber);
+        Assert.Equal(new DateTime(2023, 3, 21), firstWeek.StartDate);
+        Assert.Equal(new DateTime(2023, 3, 24), firstWeek.EndDate);
+        Assert.Equal("1402/01/01", firstWeek.StartDateShamsi);
+        Assert.Equal("1402/01/04", firstWeek.EndDateShamsi);
+
+        var lastWeek = weeks[^1];
+        Assert.Equal(new DateTime(2023, 4, 20), lastWeek.EndDate);
+        Assert.Equal("1402/01/31", lastWeek.EndDateShamsi);
+    }
+
+    [Fact]
+    public void GetWeeksOfShamsiMonth_Throws_WhenMonthOutOfRange()
+    {
+        Assert.Throws<ArgumentOutOfRangeException>(() => 1402.GetWeeksOfShamsiMonth(13));
+    }
+
+    [Fact]
+    public void GetMonthsOfShamsiSeason_ReturnsThreeMonths()
+    {
+        var months = 1402.GetMonthsOfShamsiSeason(1);
+
+        Assert.Equal(3, months.Count);
+        Assert.Equal(1, months[0].MonthNumber);
+        Assert.Equal("فروردین", months[0].MonthName);
+        Assert.Equal("1402/01/01", months[0].StartDateShamsi);
+        Assert.Equal("1402/01/31", months[0].EndDateShamsi);
+        Assert.Equal(3, months[2].MonthNumber);
+        Assert.Equal("خرداد", months[2].MonthName);
+        Assert.Equal("1402/03/31", months[2].EndDateShamsi);
+    }
+
+    [Fact]
+    public void GetMonthsOfShamsiSeason_Throws_WhenSeasonStartMonthInvalid()
+    {
+        Assert.Throws<ArgumentOutOfRangeException>(() => 1402.GetMonthsOfShamsiSeason(2));
+    }
+
+    [Fact]
+    public void GetSeasonsOfShamsiYear_ReturnsFourSeasons()
+    {
+        var pc = new PersianCalendar();
+        var esfandDays = pc.GetDaysInMonth(1402, 12);
+
+        var seasons = 1402.GetSeasonsOfShamsiYear();
+
+        Assert.Equal(4, seasons.Count);
+        Assert.Equal(1, seasons[0].SeasonNumber);
+        Assert.Equal("بهار", seasons[0].SeasonName);
+        Assert.Equal("1402/01/01", seasons[0].StartDateShamsi);
+        Assert.Equal("1402/03/31", seasons[0].EndDateShamsi);
+        Assert.Equal(4, seasons[3].SeasonNumber);
+        Assert.Equal("زمستان", seasons[3].SeasonName);
+        Assert.Equal("1402/10/01", seasons[3].StartDateShamsi);
+        Assert.Equal($"1402/12/{esfandDays:00}", seasons[3].EndDateShamsi);
+    }
+
+    [Fact]
+    public void ToUnixTimestamp_CombinesShamsiDateAndTime()
+    {
+        var expected = new DateTimeOffset(new DateTime(2023, 3, 21, 13, 5, 9, DateTimeKind.Utc)).ToUnixTimeMilliseconds();
+        Assert.Equal(expected, "1402/01/01".ToUnixTimestamp("13:05:09"));
+    }
+
+    [Fact]
+    public void ToUnixTimestamp_DefaultsSecondsToZero_WhenOmitted()
+    {
+        var expected = new DateTimeOffset(new DateTime(2023, 3, 21, 13, 5, 0, DateTimeKind.Utc)).ToUnixTimeMilliseconds();
+        Assert.Equal(expected, "1402/01/01".ToUnixTimestamp("13:05"));
+    }
+
+    [Theory]
+    [InlineData("25:00")]
+    [InlineData("13:60")]
+    [InlineData("not-a-time")]
+    public void ToUnixTimestamp_Throws_WhenTimeInvalid(string time)
+    {
+        Assert.Throws<FormatException>(() => "1402/01/01".ToUnixTimestamp(time));
     }
 }

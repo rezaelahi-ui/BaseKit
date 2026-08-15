@@ -18,6 +18,7 @@ Target frameworks: `netstandard2.0` (سازگار با .NET Framework 4.6.1+ و 
 
 - [String Extensions](#string-extensions)
 - [Numeric Extensions](#numeric-extensions)
+- [Comparable Extensions](#comparable-extensions)
 - [Date Extensions (تاریخ شمسی)](#date-extensions-تاریخ-شمسی)
 - [Validation Extensions](#validation-extensions)
 - [Fuzzy Matching (شباهت متن)](#fuzzy-matching-شباهت-متن)
@@ -31,6 +32,7 @@ Target frameworks: `netstandard2.0` (سازگار با .NET Framework 4.6.1+ و 
 - [IP Extensions](#ip-extensions)
 - [Common: Money](#common-money)
 - [Common: Result\<T\>](#common-resultt)
+- [Common: Option\<T\>](#common-optiont)
 - [Common: PagedResult\<T\>](#common-pagedresultt)
 - [Common: Validator (Fluent)](#common-validator-fluent)
 - [Common: SimpleCache](#common-simplecache)
@@ -60,6 +62,9 @@ Target frameworks: `netstandard2.0` (سازگار با .NET Framework 4.6.1+ و 
 
 "09123456789".Mask();                  // "0912***6789"
 "یک متن طولانی است".Truncate(10);       // با حفظ کلمه‌ی کامل + "..."
+
+"hgt".ToPersianKeyboard();             // "الف" (اصلاح متنی که با چیدمان اشتباه کیبورد تایپ شده)
+"الف".ToEnglishKeyboard();             // "hgt"
 ```
 
 ### Numeric Extensions
@@ -68,7 +73,16 @@ Target frameworks: `netstandard2.0` (سازگار با .NET Framework 4.6.1+ و 
 1234567.ToSeparatedString();           // "1,234,567"
 1234567L.ToPersianCurrency();          // "۱,۲۳۴,۵۶۷ ریال"
 1234567L.ToPersianWords();             // "یک میلیون و دویست و سی و چهار هزار و پانصد و شصت و هفت"
+21L.ToPersianOrdinalWords();           // "بیست و یکم"
 500m.ToMoney("IRR");                   // Money
+```
+
+### Comparable Extensions
+
+```csharp
+5.Between(1, 10);                      // true — هر دو سر بازه شامل می‌شن
+DateTime.Today.Between(rangeStart, rangeEnd);
+"m".Between("a", "z");                 // روی هر IComparable<T> کار می‌کنه (عدد، تاریخ، رشته، Money و ...)
 ```
 
 ### Date Extensions (تاریخ شمسی)
@@ -84,6 +98,28 @@ DateTime.Now.ToClock();                // "13:05:09"
 DateTime.Today.IsWeekend();
 DateTime.Today.NextWorkingDay();
 DateTime.Today.AddWorkingDays(5);
+
+DateTime.Now.GetPersianMonthName();    // "فروردین"
+DateTime.Now.GetPersianDayName();      // "شنبه"
+DateTime.Now.GetPersianSeason();       // "بهار"
+DateTime.Now.GetShamsiYear();          // 1402 (به‌صورت عدد، بدون نیاز به parse رشته)
+DateTime.Now.GetShamsiMonth();         // 1
+
+// تعطیلات رسمی ایران: آخر هفته + تعطیلات ثابت شمسی (نوروز و ...).
+// تعطیلات مذهبی/قمری چون سال به سال جابه‌جا می‌شن، باید هرساله جداگانه پاس داده بشن.
+DateTime.Today.IsIranianHoliday();
+DateTime.Today.IsIranianHoliday(extraHolidaysShamsi: new[] { "1402/06/06" }); // مثلاً عاشورا در همون سال
+
+// اطلاعات کامل ماه/فصل/سالی که یک تاریخ در آن قرار دارد (PersianDateInfo)
+PersianDateInfo info = DateTime.Now.GetPersianDateInfo();
+// info.Year، info.MonthName، info.SeasonName، info.DaysInMonth،
+// info.MonthStartShamsi/MonthEndShamsi، info.SeasonStartDate/SeasonEndDate، ...
+
+List<WeekInfo> weeks = 1402.GetWeeksOfShamsiMonth(month: 1);     // هفته‌های فروردین ۱۴۰۲ (شروع از شنبه)
+List<MonthInfo> months = 1402.GetMonthsOfShamsiSeason(seasonStartMonth: 1); // سه ماه بهار ۱۴۰۲
+List<SeasonInfo> seasons = 1402.GetSeasonsOfShamsiYear();        // چهار فصل سال ۱۴۰۲
+
+"1402/01/01".ToUnixTimestamp("13:05:09"); // ترکیب تاریخ شمسی + رشته‌ی ساعت به Unix timestamp (میلی‌ثانیه، UTC)
 ```
 
 ### Validation Extensions
@@ -93,6 +129,15 @@ DateTime.Today.AddWorkingDays(5);
 "09123456789".IsValidMobileNumber();    // شماره موبایل ایران
 "test@example.com".IsValidEmail();
 "DE89370400440532013000".IsValidIban(); // شبا/IBAN با الگوریتم استاندارد mod-97
+
+"1234567890".IsValidPostalCode();       // کدپستی ۱۰رقمی ایران (فقط فرمت؛ الگوریتم چک‌دیجیت رسمی‌ای وجود ندارد)
+"12345678918".IsValidLegalNationalId(); // شناسه‌ملی اشخاص حقوقی (شرکت) — الگوریتم چک‌دیجیتش با کد ملی اشخاص حقیقی فرق داره
+
+"6037-9900-0000-0006".IsValidCardNumber(); // شماره کارت ۱۶رقمی، الگوریتم Luhn
+"6037990000000006".GetBankName();          // "بانک ملی ایران" (از روی BIN؛ فقط بانک‌های شناخته‌شده، برای ناشناخته null برمی‌گرداند)
+"IR120170000000000000000000".GetBankNameFromIban(); // نام بانک از روی کد سه‌رقمی بانک داخل شبا
+
+"12ب34567".IsValidPlateNumber();        // فرمت پلاک خودروی ایران
 ```
 
 ### Fuzzy Matching (شباهت متن)
@@ -128,6 +173,9 @@ items.DistinctByKey(x => x.Id);        // (هم‌نام با DistinctBy نت 6+
 items.Page(pageNumber: 2, pageSize: 20);
 items.ToPagedResult(pageNumber: 2, pageSize: 20); // PagedResult<T> با TotalPages/HasNextPage/...
 oldList.HasChanges(newList);
+
+list.Shuffle();                        // به‌هم‌ریختن لیست به‌صورت درجا (Fisher-Yates)
+items.RandomItem();                    // یک آیتم تصادفی از دنباله
 ```
 
 ### Object / Reflection Extensions
@@ -150,6 +198,11 @@ await someTask.WithTimeout(TimeSpan.FromSeconds(5));   // TimeoutException در 
 
 Func<Task<int>> operation = () => CallExternalServiceAsync();
 await operation.RetryAsync(retryCount: 3, delay: TimeSpan.FromSeconds(1));
+await operation.RetryWithBackoffAsync(retryCount: 5); // فاصله‌ی نمایی (exponential backoff) + jitter بین تلاش‌ها
+
+// منتظر همه‌ی Taskها می‌مونه حتی اگه بعضی fail بشن، و همه‌ی exceptionهاشون رو جمع می‌کنه
+// (بر خلاف Task.WhenAll که فقط اولی رو نشون می‌ده)
+await tasks.WhenAllSafe();
 ```
 
 ### File Extensions
@@ -165,6 +218,12 @@ await operation.RetryAsync(retryCount: 3, delay: TimeSpan.FromSeconds(1));
 myObject.Dump();                       // JSON خوانا برای دیباگ سریع
 myObject.ToJson();
 json.FromJson<MyDto>();
+
+Action action = () => DoSomeWork();
+TimeSpan elapsed = action.Measure();                      // Action ← فقط زمان اجرا
+
+Func<int> compute = () => Compute();
+var (result, took) = compute.Measure();                   // Func<T> ← نتیجه + زمان اجرا
 ```
 
 ### IP Extensions
@@ -194,6 +253,22 @@ Result<User> result = userId > 0
     : Result<User>.Failure("کاربر یافت نشد");
 
 if (result.IsSuccess) { /* result.Value */ }
+```
+
+### Common: Option\<T\>
+
+مکمل `Result<T>` برای جایی که فقط «هست/نیست» مهمه، نه یک پیام خطای مشخص.
+
+```csharp
+Option<User> option = repository.TryFind(id) is { } user
+    ? Option<User>.Some(user)
+    : Option<User>.None();
+
+option.Match(
+    some: user => user.Name,
+    none: () => "پیدا نشد");
+
+if (option.TryGetValue(out var value)) { /* value */ }
 ```
 
 ### Common: PagedResult\<T\>

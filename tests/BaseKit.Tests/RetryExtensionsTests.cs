@@ -53,4 +53,61 @@ public class RetryExtensionsTests
         Func<Task<int>> action = () => Task.FromResult(1);
         await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => action.RetryAsync(retryCount: 0));
     }
+
+    [Fact]
+    public async Task RetryWithBackoffAsync_Generic_ReturnsResult_WhenSucceedsBeforeRunningOut()
+    {
+        var attempts = 0;
+        Func<Task<int>> action = () =>
+        {
+            attempts++;
+            if (attempts < 3) throw new InvalidOperationException("temporary failure");
+            return Task.FromResult(42);
+        };
+
+        var result = await action.RetryWithBackoffAsync(retryCount: 5, initialDelay: TimeSpan.FromMilliseconds(1));
+
+        Assert.Equal(42, result);
+        Assert.Equal(3, attempts);
+    }
+
+    [Fact]
+    public async Task RetryWithBackoffAsync_Generic_Throws_WhenAllAttemptsFail()
+    {
+        Func<Task<int>> action = () => throw new InvalidOperationException("always fails");
+
+        await Assert.ThrowsAsync<AggregateException>(
+            () => action.RetryWithBackoffAsync(retryCount: 3, initialDelay: TimeSpan.FromMilliseconds(1)));
+    }
+
+    [Fact]
+    public async Task RetryWithBackoffAsync_NonGeneric_CompletesAfterTransientFailures()
+    {
+        var attempts = 0;
+        Func<Task> action = () =>
+        {
+            attempts++;
+            if (attempts < 2) throw new InvalidOperationException("temporary failure");
+            return Task.CompletedTask;
+        };
+
+        await action.RetryWithBackoffAsync(retryCount: 3, initialDelay: TimeSpan.FromMilliseconds(1));
+
+        Assert.Equal(2, attempts);
+    }
+
+    [Fact]
+    public async Task RetryWithBackoffAsync_Throws_WhenRetryCountLessThanOne()
+    {
+        Func<Task<int>> action = () => Task.FromResult(1);
+        await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => action.RetryWithBackoffAsync(retryCount: 0));
+    }
+
+    [Fact]
+    public async Task RetryWithBackoffAsync_Throws_WhenBackoffFactorLessThanOne()
+    {
+        Func<Task<int>> action = () => Task.FromResult(1);
+        await Assert.ThrowsAsync<ArgumentOutOfRangeException>(
+            () => action.RetryWithBackoffAsync(backoffFactor: 0.5));
+    }
 }

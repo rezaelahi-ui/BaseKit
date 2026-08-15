@@ -119,5 +119,34 @@ namespace BaseKit.Extensions
 
             return string.Join(" و ", parts);
         }
+
+        // استثناهای صرف ترتیبی فارسی که با افزودن ساده‌ی «م» به آخر عدد اصلی درست نمی‌شوند.
+        private static readonly Dictionary<string, string> OrdinalWordExceptions = new()
+        {
+            ["سه"] = "سوم",
+            ["سی"] = "سی‌ام",
+        };
+
+        /// <summary>
+        /// تبدیل عدد به حروف ترتیبی فارسی («اول»، «دوم»، «سوم»، ...، «بیست و یکم»، ...)؛ مکمل <see cref="ToPersianWords(long)"/>.
+        /// </summary>
+        public static string ToPersianOrdinalWords(this long number)
+        {
+            if (number < 0)
+                throw new ArgumentOutOfRangeException(nameof(number), "عدد ترتيبي نمي‌تواند منفي باشد");
+
+            if (number == 0) return "صفرم";
+            if (number == 1) return "اول";
+
+            var parts = number.ToPersianWords().Split(new[] { " و " }, StringSplitOptions.None);
+            var lastIndex = parts.Length - 1;
+            var lastWord = parts[lastIndex];
+
+            parts[lastIndex] = OrdinalWordExceptions.TryGetValue(lastWord, out var exception)
+                ? exception
+                : lastWord + "م";
+
+            return string.Join(" و ", parts);
+        }
     }
 }

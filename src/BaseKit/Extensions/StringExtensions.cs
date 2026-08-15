@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Text;
 using BaseKit.Exceptions;
 
 namespace BaseKit.Extensions
@@ -181,6 +183,56 @@ namespace BaseKit.Extensions
                 truncated = truncated.Substring(0, lastSpace);
 
             return truncated + suffix;
+        }
+
+        // نگاشت کلید-به-کلید بین حروف کیبورد استاندارد فارسی (ISIRI 9147) و کیبورد انگلیسی (QWERTY)،
+        // برای اصلاح متنی که با چیدمان اشتباه کیبورد تایپ شده (مثلاً نیت فارسی ولی روی کیبورد انگلیسی).
+        // فقط حروف/چند نشانه‌ی پرکاربرد پوشش داده می‌شود؛ ارقام و بقیه‌ی نشانه‌ها بدون تغییر باقی می‌مانند.
+        private static readonly Dictionary<char, char> EnglishToPersianKeyMap = new()
+        {
+            ['q'] = 'ض', ['w'] = 'ص', ['e'] = 'ث', ['r'] = 'ق', ['t'] = 'ف', ['y'] = 'غ',
+            ['u'] = 'ع', ['i'] = 'ه', ['o'] = 'خ', ['p'] = 'ح', ['['] = 'ج', [']'] = 'چ',
+            ['a'] = 'ش', ['s'] = 'س', ['d'] = 'ی', ['f'] = 'ب', ['g'] = 'ل', ['h'] = 'ا',
+            ['j'] = 'ت', ['k'] = 'ن', ['l'] = 'م', [';'] = 'ک', ['\''] = 'گ',
+            ['z'] = 'ظ', ['x'] = 'ط', ['c'] = 'ز', ['v'] = 'ر', ['b'] = 'ذ', ['n'] = 'د',
+            ['m'] = 'ئ', [','] = 'و', ['.'] = '،', ['/'] = '.',
+        };
+
+        private static readonly Dictionary<char, char> PersianToEnglishKeyMap =
+            EnglishToPersianKeyMap.ToDictionary(kv => kv.Value, kv => kv.Key);
+
+        /// <summary>
+        /// تبدیل متنی که با نیت فارسی ولی روی کیبورد با چیدمان انگلیسی تایپ شده (مثل «hpd» به‌جای «الف»)
+        /// به معادل فارسی‌اش، بر اساس موقعیت کلیدها در چیدمان استاندارد فارسی (ISIRI 9147).
+        /// ارقام و نشانه‌های پوشش‌داده‌نشده بدون تغییر باقی می‌مانند.
+        /// </summary>
+        public static string ToPersianKeyboard(this string str)
+        {
+            if (str.IsEmpty()) return str;
+
+            var builder = new StringBuilder(str.Length);
+            foreach (var c in str)
+            {
+                var lower = char.ToLowerInvariant(c);
+                builder.Append(EnglishToPersianKeyMap.TryGetValue(lower, out var persianChar) ? persianChar : c);
+            }
+
+            return builder.ToString();
+        }
+
+        /// <summary>
+        /// عکس <see cref="ToPersianKeyboard"/>: تبدیل متنی که با نیت انگلیسی ولی روی کیبورد فارسی تایپ شده
+        /// به معادل انگلیسی‌اش (حروف کوچک).
+        /// </summary>
+        public static string ToEnglishKeyboard(this string str)
+        {
+            if (str.IsEmpty()) return str;
+
+            var builder = new StringBuilder(str.Length);
+            foreach (var c in str)
+                builder.Append(PersianToEnglishKeyMap.TryGetValue(c, out var englishChar) ? englishChar : c);
+
+            return builder.ToString();
         }
     }
 }

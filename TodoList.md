@@ -10,10 +10,26 @@
 - [x] `NormalizeArabicChars()` — تبدیل حروف عربی (ي، ك) به فارسی (ی، ک)
 - [x] `Mask()` — نمایش شماره کارت/موبایل به‌صورت `0912***1234`
 - [x] `Truncate(int maxLength, string suffix = "...")` — کوتاه کردن متن با حفظ کلمه کامل
+- [x] `ToPersianKeyboard()` / `ToEnglishKeyboard()` — تبدیل متنی که با چیدمان اشتباه کیبورد تایپ شده (مثلاً نیت فارسی ولی با کیبورد انگلیسی تایپ شده) به زبان درست؛ مشکل رایج فرم‌های فارسی
 
 ### Numeric
 - [x] `ToPersianCurrency()` / `ToSeparatedString()` — فرمت `1,234,567`
 - [x] `ToPersianWords()` — تبدیل عدد به حروف فارسی (برای چک/فاکتور)
+- [x] `ToPersianOrdinalWords()` — تبدیل عدد به حروف ترتیبی فارسی («اول»، «دوم»، «سوم»، ...)، مکمل `ToPersianWords()`
+
+### Comparable
+- [x] `Between<T>(T min, T max)` روی هر `IComparable<T>` (عدد، تاریخ، رشته، `Money` و ...) — بررسی قرار گرفتن مقدار در یک بازه (شامل هر دو سر)؛ کلاس جدا (`ComparableExtensions.cs`) چون به هیچ نوع خاصی وابسته نیست
+
+### Date
+- [x] `GetPersianMonthName()` / `GetPersianDayName()` / `GetPersianSeason()` روی `DateTime` — یک پله جلوتر از `ToShamsi()` فعلی (نام ماه/روز هفته/فصل به فارسی)
+- [x] `IsIranianHoliday()` — تعطیلات رسمی ایران (عید، تاسوعا/عاشورا و...)؛ چون سال به سال (به‌خصوص تعطیلات مذهبی با تقویم قمری) تغییر می‌کنه، باید لیست قابل override/تنظیم باشه، نه هاردکد ثابت
+- [x] `GetShamsiYear()` / `GetShamsiMonth()` روی `DateTime` — عدد سال/ماه شمسی به‌تنهایی، بدون نیاز به parse کردن خروجی رشته‌ای `ToShamsi()`
+- [x] `GetPersianDateInfo()` روی `DateTime` (ایده از یه پروژه‌ی دیگه، `DateHelper.GetDateInfo`) — مدل غنی `PersianDateInfo` شامل سال/ماه/روز/نام‌روزهفته/نام‌ماه/نام‌فصل/تعداد روزهای ماه و سال + تاریخ شروع و پایان ماه، فصل و سال جاری (هم به‌صورت رشته‌ی شمسی هم `DateTime` میلادی)
+- [x] `GetWeeksOfShamsiMonth(int year, int month)` (ایده از همون پروژه، `DateHelper.GetWeeksOfMonth`) — لیست هفته‌های یک ماه شمسی (شروع هفته از شنبه)؛ هر هفته شامل شماره، تاریخ شروع/پایان (کوتاه‌شده به بازه‌ی ماه) و یک `IsComplete` که نشون می‌ده هفته تموم‌شده یا نه. به‌صورت extension روی `int year` پیاده شد (نه متد جدا)
+- [x] `GetMonthsOfShamsiSeason(int year, int seasonStartMonth)` / `GetSeasonsOfShamsiYear(int year)` (همون ایده) — تفکیک یک فصل به ۳ ماه یا یک سال به ۴ فصل، هرکدوم با بازه‌ی تاریخ شروع/پایان و `IsComplete`
+- [x] `ToUnixTimestamp()` روی ترکیب تاریخ‌شمسی + رشته‌ساعت (`"1402/01/01".ToUnixTimestamp("13:05")`) — وقتی تاریخ و ساعت جدا از هم ذخیره شدن و باید یکجا Unix timestamp (ms، UTC) ساخته بشه
+
+مدل‌های جدید `PersianDateInfo`، `WeekInfo`، `MonthInfo`، `SeasonInfo` در `src/BaseKit/Models/` اضافه شدند.
 
 ### Object / Reflection
 - [x] `Clone<T>()` — deep clone ساده (JSON serialize/deserialize)
@@ -27,21 +43,30 @@
 
 ### Task / Async
 - [x] `WithTimeout(this Task, TimeSpan)` — اجرای یک Task با timeout
+- [x] `WhenAllSafe(this IEnumerable<Task>)` — منتظر همه‌ی تسک‌ها می‌مونه حتی اگه بعضی fail بشن، و همه‌ی exceptionها رو (نه فقط اولی رو، بر خلاف `Task.WhenAll`) در یک `AggregateException` جمع می‌کنه. یک overload جنریک هم برای `IEnumerable<Task<T>>` اضافه شد
 
 ### Validation
 - [x] `IsValidNationalCode()` — اعتبارسنجی کد ملی ایرانی با الگوریتم چک‌دیجیت
 - [x] `IsValidMobileNumber()` — شماره موبایل ایران (`09xxxxxxxxx`)
 - [x] `IsValidEmail()`
 - [x] `IsValidIban()` — اعتبارسنجی شماره شبا (mod-97 عمومی، برای IR هم کار می‌کند)
+- [x] `IsValidPostalCode()` — کدپستی ۱۰رقمی ایران؛ چون کدپستی برخلاف کد ملی الگوریتم چک‌دیجیت رسمی ندارد، فقط فرمت (۱۰ رقم) و رد ارقام تکراری بدیهاً نامعتبر بررسی می‌شود
+- [x] `IsValidLegalNationalId()` — شناسه‌ملی اشخاص حقوقی (شرکت‌ها)؛ الگوریتم چک‌دیجیتش با `IsValidNationalCode()` (اشخاص حقیقی) فرق داره
+- [x] `IsValidCardNumber()` + `GetBankName()` — اعتبارسنجی شماره کارت با الگوریتم Luhn + تشخیص نام بانک از ۶ رقم اول (BIN)؛ جدول BIN به بانک‌های شناخته‌شده و پرکاربرد محدوده، نه منبع رسمی/کامل
+- [x] `GetBankNameFromIban()` — تشخیص نام بانک از کد سه‌رقمی بانک داخل شماره شبا (بلافاصله بعد از `IRxx`)
+- [x] `IsValidPlateNumber()` — پلاک خودرو ایران (فرمت `12ب34567`)
 
 ### Collections بیشتر
 - [x] `ForEach<T>(this IEnumerable<T>, Action<T>)`
 - [x] `ChunkBy<T>(this IEnumerable<T>, int size)` — عمداً هم‌نام با `Enumerable.Chunk` نت 6+ نیست (جلوگیری از Ambiguous call)
 - [x] `DistinctByKey<T,TKey>()` — عمداً هم‌نام با `Enumerable.DistinctBy` نت 6+ نیست
 - [x] `Page(int pageNumber, int pageSize)` — صفحه‌بندی لیست
+- [x] `Shuffle<T>(this IList<T>)` — به‌هم‌ریختن ترتیب لیست (Fisher-Yates)
+- [x] `RandomItem<T>(this IEnumerable<T>)` — انتخاب تصادفی یک آیتم از لیست
 
 ### Retry / Resilience
 - [x] `RetryAsync(this Func<Task>, int retryCount, TimeSpan? delay)` — تلاش مجدد ساده بدون نیاز به Polly
+- [x] `RetryWithBackoffAsync(...)` با **exponential backoff + jitter** — فاصله‌ی بین تلاش‌ها به‌جای ثابت‌بودن نمایی افزایش پیدا می‌کنه (با کمی نویز رندوم)، مناسب صدا زدن APIهای بیرونی. به‌جای overload اسم جدا گرفت تا با overloadهای مبتنی‌بر پارامتر پیش‌فرض `RetryAsync` تداخل نکنه
 
 ### Caching سبک
 - [x] `SimpleCache<TKey,TValue>` با expiration ساده (in-memory، نه Redis)
@@ -49,6 +74,7 @@
 ### Logging / Debug کمکی
 - [x] `Dump()` — پرینت خوانا از هر object (JSON indented) برای دیباگ سریع
 - [x] `ToJson()` / `FromJson<T>()` — wrapper کوتاه روی `System.Text.Json`
+- [x] `Measure()` روی `Action`/`Func<T>` — زمان اجرا رو اندازه می‌گیره و برمی‌گردونه، برای پروفایلینگ سریع بدون `Stopwatch` دستی
 
 ### File / Path
 - [x] `EnsureDirectoryExists()` — روی مسیر رشته‌ای (نسخه‌ی `FileInfo` فعلاً اضافه نشده)
@@ -79,6 +105,7 @@
 - [x] **`Money`** — value object برای مبلغ + واحد پول (`Common/Money.cs`)؛ جمع/تفریق/مقایسه با واحد متفاوت `InvalidOperationException` می‌دهد، `ToMoney(this decimal, string currency)` هم در `NumericExtensions` اضافه شد
 - [x] **Business-day helpers** روی `DateExtensions`: `IsWeekend()` (پنج‌شنبه+جمعه، قابل تنظیم)، `NextWorkingDay()`، `AddWorkingDays()`
 - [x] **Fluent Validator** (`Common/Validator.cs` + `Common/ValidationResult.cs`) — بر خلاف `Guard` که در اولین خطا throw می‌کند، همه‌ی قوانین را چک کرده و لیست کامل خطاها را برمی‌گرداند
+- [x] **`Option<T>`** (`Common/Option.cs`) — مکمل `Result<T>` فعلی؛ برای جایی که فقط «هست/نیست» مهمه، نه پیام خطای مشخص. شامل `Some`/`None`/`FromNullable`/`GetValueOrThrow`/`GetValueOrDefault`/`TryGetValue`/`Match`
 
 ## Attributes (پورت‌شده از پروژه‌های اصلی)
 
