@@ -11,6 +11,7 @@
 - [x] `Mask()` — نمایش شماره کارت/موبایل به‌صورت `0912***1234`
 - [x] `Truncate(int maxLength, string suffix = "...")` — کوتاه کردن متن با حفظ کلمه کامل
 - [x] `ToPersianKeyboard()` / `ToEnglishKeyboard()` — تبدیل متنی که با چیدمان اشتباه کیبورد تایپ شده (مثلاً نیت فارسی ولی با کیبورد انگلیسی تایپ شده) به زبان درست؛ مشکل رایج فرم‌های فارسی
+- [x] `ToIntOrNull()` / `ToDecimalOrNull()` / `ToDoubleOrNull()` / `ToLongOrNull()` — نسخه‌ی nullable و بدون throw از `ToInt()`/`ToDecimal()`/`ToDouble()`/`ToLong()` فعلی؛ جایگزین `int.TryParse(s, out var v) ? v : null` دستی
 
 ### Numeric
 - [x] `ToPersianCurrency()` / `ToSeparatedString()` — فرمت `1,234,567`
@@ -34,6 +35,8 @@
 ### Object / Reflection
 - [x] `Clone<T>()` — deep clone ساده (JSON serialize/deserialize)
 - [x] `ToDictionary()` — تبدیل object به `Dictionary<string, object>` (لاگ/دیباگ)
+- [x] `In<T>(params T[] values)` — جایگزین زنجیره‌ی `==`/`||` (`status.In(a, b, c)` به‌جای `status == a || status == b || status == c`)
+- [x] `Tap<T>(Action<T>)` — اجرای side-effect (مثل لاگ) وسط یک زنجیره‌ی فلوئنت بدون شکستنش، با برگردوندن خودِ همون مقدار
 
 ### Exception
 - [x] `GetFullMessage()` — جمع‌کردن پیام تمام InnerExceptionها در یک رشته
@@ -63,6 +66,11 @@
 - [x] `Page(int pageNumber, int pageSize)` — صفحه‌بندی لیست
 - [x] `Shuffle<T>(this IList<T>)` — به‌هم‌ریختن ترتیب لیست (Fisher-Yates)
 - [x] `RandomItem<T>(this IEnumerable<T>)` — انتخاب تصادفی یک آیتم از لیست
+- [x] `GetOrDefault<T>(this IList<T>, int index, T defaultValue)` — دسترسی امن به ایندکس بدون `IndexOutOfRangeException`؛ برخلاف `Enumerable.ElementAtOrDefault` اجازه‌ی مقدار پیش‌فرض دلخواه (نه فقط `default(T)`) رو می‌ده
+- [x] `EmptyIfNull<T>(this IEnumerable<T>?)` — جایگزین `source ?? Enumerable.Empty<T>()` قبل از یک `foreach`
+
+### Dictionary
+- [x] `GetOrDefault<TKey,TValue>(this IReadOnlyDictionary<TKey,TValue>, TKey key, TValue defaultValue)` — جایگزین الگوی `dict.TryGetValue(key, out var v) ? v : defaultValue`؛ عمداً هم‌نام با `CollectionExtensions.GetValueOrDefault` (نت 6+) نیست
 
 ### Retry / Resilience
 - [x] `RetryAsync(this Func<Task>, int retryCount, TimeSpan? delay)` — تلاش مجدد ساده بدون نیاز به Polly
@@ -95,6 +103,7 @@
 
 - [x] کلاس **Guard clauses** (`Guard.Against.Null(...)`, `Guard.Against.Empty(...)`) به‌جای تکرار `if (x.IsEmpty()) throw ...`
 - [x] الگوی **Result&lt;T&gt;** ساده برای برگردوندن نتیجه بدون exception (جایگزین بعضی throwها در متدهای `To*`)
+- [x] `ToResult<T>(this Func<T>)` (`Extensions/ResultExtensions.cs`) — پل بین دنیای throw-based و `Result<T>`؛ کل try/catch رو جمع می‌کنه (`Success` با مقدار برگشتی، `Failure` با پیام exception)
 - [x] مدل **`PagedResult<T>`** برای برگردوندن یک صفحه از نتایج در یک پاسخ استاندارد، شامل:
   - `Items` — لیست مقادیر همان صفحه
   - `PageNumber`, `PageSize`

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -65,4 +66,29 @@ public class ListExtensionsTests
     }
 
     public record Person(string Name);
+
+    [Theory]
+    [InlineData(0, "a")]
+    [InlineData(2, "c")]
+    public void GetOrDefault_Index_ReturnsItem_WhenInRange(int index, string expected)
+    {
+        var list = new List<string> { "a", "b", "c" };
+        Assert.Equal(expected, list.GetOrDefault(index, "fallback"));
+    }
+
+    [Theory]
+    [InlineData(3)]
+    [InlineData(-1)]
+    public void GetOrDefault_Index_ReturnsDefault_WhenOutOfRange(int index)
+    {
+        var list = new List<string> { "a", "b", "c" };
+        Assert.Equal("fallback", list.GetOrDefault(index, "fallback"));
+    }
+
+    [Fact]
+    public void GetOrDefault_Index_Throws_WhenListNull()
+    {
+        List<int>? list = null;
+        Assert.Throws<ArgumentNullException>(() => list!.GetOrDefault(0, -1));
+    }
 }

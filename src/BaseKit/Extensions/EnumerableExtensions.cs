@@ -124,5 +124,11 @@ namespace BaseKit.Extensions
 
             return materialized[new Random().Next(materialized.Count)];
         }
+
+        /// <summary>
+        /// اگر دنباله null باشد یک دنباله‌ی خالی برمی‌گرداند، وگرنه خودش را؛ جایگزین <c>source ?? Enumerable.Empty&lt;T&gt;()</c>
+        /// قبل از یک <c>foreach</c>.
+        /// </summary>
+        public static IEnumerable<T> EmptyIfNull<T>(this IEnumerable<T>? source) => source ?? Enumerable.Empty<T>();
     }
 }

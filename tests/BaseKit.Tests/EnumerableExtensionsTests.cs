@@ -134,4 +134,18 @@ public class EnumerableExtensionsTests
         IEnumerable<int>? source = null;
         Assert.Throws<ArgumentNullException>(() => source!.RandomItem());
     }
+
+    [Fact]
+    public void EmptyIfNull_ReturnsEmptySequence_WhenSourceNull()
+    {
+        IEnumerable<int>? source = null;
+        Assert.Empty(source.EmptyIfNull());
+    }
+
+    [Fact]
+    public void EmptyIfNull_ReturnsSameSequence_WhenSourceNotNull()
+    {
+        var source = new[] { 1, 2, 3 };
+        Assert.Equal(source, source.EmptyIfNull());
+    }
 }
