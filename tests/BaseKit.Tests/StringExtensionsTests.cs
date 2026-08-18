@@ -135,6 +135,45 @@ public class StringExtensionsTests
     }
 
     [Theory]
+    [InlineData("123", 123)]
+    [InlineData("1,234", 1234)]
+    [InlineData("abc", null)]
+    [InlineData(null, null)]
+    [InlineData("", null)]
+    public void ToIntOrNull(string? input, int? expected)
+    {
+        Assert.Equal(expected, input.ToIntOrNull());
+    }
+
+    [Theory]
+    [InlineData("1,234.5", 1234.5)]
+    [InlineData("abc", null)]
+    [InlineData(null, null)]
+    public void ToDecimalOrNull(string? input, double? expectedAsDouble)
+    {
+        decimal? expected = expectedAsDouble.HasValue ? (decimal)expectedAsDouble.Value : null;
+        Assert.Equal(expected, input.ToDecimalOrNull());
+    }
+
+    [Theory]
+    [InlineData("1,234.5", 1234.5)]
+    [InlineData("abc", null)]
+    [InlineData(null, null)]
+    public void ToDoubleOrNull(string? input, double? expected)
+    {
+        Assert.Equal(expected, input.ToDoubleOrNull());
+    }
+
+    [Theory]
+    [InlineData("123456789012", 123456789012)]
+    [InlineData("abc", null)]
+    [InlineData(null, null)]
+    public void ToLongOrNull(string? input, long? expected)
+    {
+        Assert.Equal(expected, input.ToLongOrNull());
+    }
+
+    [Theory]
     [InlineData("1", true)]
     [InlineData("0", false)]
     [InlineData("true", true)]

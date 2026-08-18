@@ -24,6 +24,7 @@ Target frameworks: `netstandard2.0` (سازگار با .NET Framework 4.6.1+ و 
 - [Fuzzy Matching (شباهت متن)](#fuzzy-matching-شباهت-متن)
 - [Enum Extensions](#enum-extensions)
 - [Collection Extensions](#collection-extensions)
+- [Dictionary Extensions](#dictionary-extensions)
 - [Object / Reflection Extensions](#object--reflection-extensions)
 - [Exception Extensions](#exception-extensions)
 - [Task Extensions](#task-extensions)
@@ -65,6 +66,11 @@ Target frameworks: `netstandard2.0` (سازگار با .NET Framework 4.6.1+ و 
 
 "hgt".ToPersianKeyboard();             // "الف" (اصلاح متنی که با چیدمان اشتباه کیبورد تایپ شده)
 "الف".ToEnglishKeyboard();             // "hgt"
+
+"1,234".ToIntOrNull();                 // 1234 (int?) — به‌جای throw کردن روی ورودی خالی/نامعتبر، null برمی‌گردونه
+"1,234.5".ToDecimalOrNull();           // 1234.5m (decimal?)
+"1,234.5".ToDoubleOrNull();            // 1234.5 (double?)
+"123456789012".ToLongOrNull();         // 123456789012 (long?)
 ```
 
 ### Numeric Extensions
@@ -176,6 +182,14 @@ oldList.HasChanges(newList);
 
 list.Shuffle();                        // به‌هم‌ریختن لیست به‌صورت درجا (Fisher-Yates)
 items.RandomItem();                    // یک آیتم تصادفی از دنباله
+list.GetOrDefault(index: 10, "fallback"); // دسترسی امن به ایندکس، بدون IndexOutOfRangeException
+maybeNullList.EmptyIfNull();           // یک دنباله‌ی خالی به‌جای null، برای foreach امن
+```
+
+### Dictionary Extensions
+
+```csharp
+dict.GetOrDefault("key", defaultValue); // الگوی TryGetValue، خلاصه‌شده به یک عبارت
 ```
 
 ### Object / Reflection Extensions
@@ -183,6 +197,9 @@ items.RandomItem();                    // یک آیتم تصادفی از دنب
 ```csharp
 var clone = myObject.Clone();          // deep clone با JSON serialize/deserialize
 var dict = myObject.ToDictionary();    // Dictionary<string, object?> از پراپرتی‌های public
+
+status.In(Status.Active, Status.Pending); // به‌جای status == Status.Active || status == Status.Pending
+GetData().Tap(x => logger.LogInformation("{Count} items", x.Count)).Process(); // side-effect وسط چین، بدون شکستنش
 ```
 
 ### Exception Extensions
@@ -253,6 +270,9 @@ Result<User> result = userId > 0
     : Result<User>.Failure("کاربر یافت نشد");
 
 if (result.IsSuccess) { /* result.Value */ }
+
+Func<User> getUser = () => GetUser(id);
+Result<User> viaFunc = getUser.ToResult(); // یک try/catch رو جمع می‌کنه: Success(value) یا Failure(ex.Message)
 ```
 
 ### Common: Option\<T\>

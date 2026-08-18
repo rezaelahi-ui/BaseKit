@@ -44,5 +44,17 @@ namespace BaseKit.Extensions
 
             return !oldSet.SetEquals(newSet);
         }
+
+        /// <summary>
+        /// دسترسی امن به ایندکس؛ اگر خارج از محدوده باشد <paramref name="defaultValue"/> را برمی‌گرداند
+        /// به‌جای پرتاب <see cref="ArgumentOutOfRangeException"/>. برخلاف <c>Enumerable.ElementAtOrDefault</c>
+        /// (که فقط <c>default(T)</c> می‌دهد)، اجازه‌ی مقدار پیش‌فرض دلخواه را هم می‌دهد.
+        /// </summary>
+        public static T GetOrDefault<T>(this IList<T> list, int index, T defaultValue = default!)
+        {
+            if (list is null) throw new ArgumentNullException(nameof(list));
+
+            return index >= 0 && index < list.Count ? list[index] : defaultValue;
+        }
     }
 }

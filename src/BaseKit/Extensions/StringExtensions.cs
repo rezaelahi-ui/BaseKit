@@ -21,6 +21,42 @@ namespace BaseKit.Extensions
             return result;
         }
 
+        /// <summary>
+        /// تبدیل رشته (با پشتیبانی از جداکننده‌ی کاما) به عدد صحیح؛ در صورت خالی/نامعتبر بودن به‌جای throw کردن null برمی‌گرداند.
+        /// </summary>
+        public static int? ToIntOrNull(this string? str)
+        {
+            if (str.IsEmpty()) return null;
+            return int.TryParse(str.Replace(",", ""), out var result) ? result : null;
+        }
+
+        /// <summary>
+        /// تبدیل رشته (با پشتیبانی از جداکننده‌ی کاما) به عدد اعشاری decimal؛ در صورت خالی/نامعتبر بودن به‌جای throw کردن null برمی‌گرداند.
+        /// </summary>
+        public static decimal? ToDecimalOrNull(this string? str)
+        {
+            if (str.IsEmpty()) return null;
+            return decimal.TryParse(str.Replace(",", ""), out var result) ? result : null;
+        }
+
+        /// <summary>
+        /// تبدیل رشته (با پشتیبانی از جداکننده‌ی کاما) به عدد اعشاری double؛ در صورت خالی/نامعتبر بودن به‌جای throw کردن null برمی‌گرداند.
+        /// </summary>
+        public static double? ToDoubleOrNull(this string? str)
+        {
+            if (str.IsEmpty()) return null;
+            return double.TryParse(str.Replace(",", ""), out var result) ? result : null;
+        }
+
+        /// <summary>
+        /// تبدیل رشته (با پشتیبانی از جداکننده‌ی کاما) به عدد صحیح بزرگ long؛ در صورت خالی/نامعتبر بودن به‌جای throw کردن null برمی‌گرداند.
+        /// </summary>
+        public static long? ToLongOrNull(this string? str)
+        {
+            if (str.IsEmpty()) return null;
+            return long.TryParse(str.Replace(",", ""), out var result) ? result : null;
+        }
+
         /// <summary>تبدیل رشته به <see cref="Uri"/>؛ باید با http/https شروع شود.</summary>
         public static Uri ToUri(this string str)
         {

@@ -24,6 +24,7 @@ Target frameworks: `netstandard2.0` (compatible with .NET Framework 4.6.1+ and .
 - [Fuzzy Matching](#fuzzy-matching)
 - [Enum Extensions](#enum-extensions)
 - [Collection Extensions](#collection-extensions)
+- [Dictionary Extensions](#dictionary-extensions)
 - [Object / Reflection Extensions](#object--reflection-extensions)
 - [Exception Extensions](#exception-extensions)
 - [Task Extensions](#task-extensions)
@@ -65,6 +66,11 @@ Target frameworks: `netstandard2.0` (compatible with .NET Framework 4.6.1+ and .
 
 "hgt".ToPersianKeyboard();             // "الف" (fixes text typed with the wrong keyboard layout)
 "الف".ToEnglishKeyboard();             // "hgt"
+
+"1,234".ToIntOrNull();                 // 1234 (int?) — returns null instead of throwing on empty/invalid input
+"1,234.5".ToDecimalOrNull();           // 1234.5m (decimal?)
+"1,234.5".ToDoubleOrNull();            // 1234.5 (double?)
+"123456789012".ToLongOrNull();         // 123456789012 (long?)
 ```
 
 ### Numeric Extensions
@@ -176,6 +182,14 @@ oldList.HasChanges(newList);
 
 list.Shuffle();                        // in-place Fisher-Yates shuffle
 items.RandomItem();                    // a random item from the sequence
+list.GetOrDefault(index: 10, "fallback"); // safe indexer, no IndexOutOfRangeException
+maybeNullList.EmptyIfNull();           // an empty sequence instead of null, for a safe foreach
+```
+
+### Dictionary Extensions
+
+```csharp
+dict.GetOrDefault("key", defaultValue); // TryGetValue, shortened to one expression
 ```
 
 ### Object / Reflection Extensions
@@ -183,6 +197,9 @@ items.RandomItem();                    // a random item from the sequence
 ```csharp
 var clone = myObject.Clone();          // deep clone via JSON serialize/deserialize
 var dict = myObject.ToDictionary();    // Dictionary<string, object?> of public properties
+
+status.In(Status.Active, Status.Pending); // instead of status == Status.Active || status == Status.Pending
+GetData().Tap(x => logger.LogInformation("{Count} items", x.Count)).Process(); // side-effect mid-chain, without breaking it
 ```
 
 ### Exception Extensions
@@ -253,6 +270,9 @@ Result<User> result = userId > 0
     : Result<User>.Failure("کاربر یافت نشد");
 
 if (result.IsSuccess) { /* result.Value */ }
+
+Func<User> getUser = () => GetUser(id);
+Result<User> viaFunc = getUser.ToResult(); // wraps a try/catch: Success(value) or Failure(ex.Message)
 ```
 
 ### Common: Option\<T\>
